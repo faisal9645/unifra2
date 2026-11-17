@@ -6,13 +6,3 @@ coverage/
 *.log
 .env*
 !.env.example
-
-# Third-party tool artifacts
-.freebuff/
-.kombai/
-
-# Graphify local caches and machine paths
-graphify-out/cache/
-graphify-out/transcripts/
-graphify-out/.graphify_*
-
