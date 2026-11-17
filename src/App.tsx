@@ -178,6 +178,8 @@ function AppContent() {
             onOpenConsultation={() => handleOpenConsultation()}
             onNavigatePage={handleNavigatePage}
             onOpenVillaAccess={(source) => handleOpenVillaShowcase(null, source || 'Editorial Home — Mysa Villas')}
+            onWatchFilm={() => setIsVirtualTourOpen(true)}
+            onSelectGalleryItem={(item) => setSelectedGalleryItem(item)}
             onSelectProject={(project) => {
               if (project.id === 'mysa' || project.id === 'mysa-villas') {
                 handleOpenVillaShowcase(project, 'Editorial Home — Select Card');
@@ -200,7 +202,8 @@ function AppContent() {
 
         {currentPage === 'about-team' && (
           <OurTeamPage
-            onOpenContact={() => handleOpenConsultation()}
+            onNavigateContact={() => handleNavigatePage('contact')}
+            onNavigateStory={() => handleNavigatePage('about-story')}
           />
         )}
 
@@ -253,7 +256,7 @@ function AppContent() {
         )}
 
         {currentPage === 'blog' && (
-          <div className="pt-16">
+          <div className="pt-20">
             <BlogSection onReadArticle={(post) => setSelectedBlogPost(post)} />
           </div>
         )}
@@ -280,28 +283,26 @@ function AppContent() {
       />
 
       {/* Floating Concierge Action Buttons */}
-      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-center gap-3">
-        {/* Scroll To Top Button */}
+      <div className="fixed bottom-5 right-5 z-40 flex flex-col items-center gap-2.5">
         {showScrollTop && (
           <button
+            type="button"
             onClick={() => scrollTo(0, { duration: 1.2 })}
-            className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-md border border-[#d8cebe] text-[#1a1918] shadow-lg flex items-center justify-center hover:border-[#c59b67] hover:text-[#c59b67] hover:bg-[#f4f0eb] transition-all cursor-pointer"
-            title="Scroll to top"
+            className="w-10 h-10 rounded-full bg-[#faf7f2]/95 backdrop-blur-md border border-[#d6cbb9] text-[#161513] shadow-lg flex items-center justify-center hover:border-[#b88c52] hover:text-[#b88c52] transition-all cursor-pointer"
+            aria-label="Scroll to top"
           >
             <ArrowUp className="w-4 h-4" />
           </button>
         )}
 
-        {/* WhatsApp VIP Concierge */}
         <a
           href="https://wa.me/917358222445?text=Hello%20Unifra%2C%20I%20would%20like%20to%20know%20more%20about%20MYSA%20Luxe%20Villas."
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex items-center justify-center w-12 h-12 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white shadow-xl hover:scale-110 transition-all duration-300"
-          title="Direct WhatsApp with Unifra Concierge"
+          className="flex items-center justify-center w-11 h-11 rounded-full bg-[#161513] hover:bg-[#2a2723] border border-[#c59b67]/40 text-[#faf7f2] shadow-xl hover:scale-105 transition-all duration-200"
+          aria-label="Direct WhatsApp with Unifra Concierge"
         >
-          <MessageCircle className="w-6 h-6" />
-          <span className="sr-only">WhatsApp Us</span>
+          <MessageCircle className="w-5 h-5 text-[#c59b67]" />
         </a>
       </div>
 

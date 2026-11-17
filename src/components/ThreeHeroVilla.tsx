@@ -92,21 +92,22 @@ export const ThreeHeroVilla: React.FC<ThreeHeroVillaProps> = ({
         <div className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12 py-2.5 sm:py-3 flex flex-wrap items-center justify-between gap-3">
           {/* Left: Render Category & Index */}
           <div className="flex items-center gap-2.5">
-            <span className="w-2 h-2 rounded-full bg-[#dfb776] animate-pulse" />
-            <span className="text-[10px] sm:text-xs font-mono tracking-widest uppercase bg-[#dfb776] text-[#0b0c0e] px-2.5 py-0.5 rounded-xs font-semibold">
+            <span className="text-[10px] sm:text-xs font-mono tracking-widest uppercase bg-[#161513] text-[#dfb776] px-2.5 py-0.5 rounded-xs font-semibold">
               {currentItem.categoryLabel || currentItem.category}
             </span>
             <span
-              className={`text-xs font-mono px-2 py-0.5 rounded-xs border ${
+              className={`text-xs font-mono tabular-nums px-2 py-0.5 rounded-xs border ${
                 isLight
-                  ? 'bg-white/80 text-gray-900 border-black/10'
+                  ? 'bg-white/90 text-[#161513] border-[#e6dfd3]'
                   : 'bg-black/60 text-[#dfb776] border-white/10'
               }`}
             >
               {String(photoIndex + 1).padStart(2, '0')} / {String(GALLERY_ITEMS.length).padStart(2, '0')}
             </span>
-            <span className="hidden md:inline text-xs font-mono text-gray-300 font-light truncate max-w-xs">
-              • {currentItem.title}
+            <span className={`hidden md:inline text-xs font-mono font-light truncate max-w-xs ${
+              isLight ? 'text-[#5b544d]' : 'text-gray-300'
+            }`}>
+              · {currentItem.title}
             </span>
           </div>
 
@@ -174,11 +175,8 @@ export const ThreeHeroVilla: React.FC<ThreeHeroVillaProps> = ({
         <div key={currentItem.id} data-dark-card className="lg:col-span-7 xl:col-span-7 text-left max-w-2xl animate-in fade-in duration-500">
           {/* Eyebrow */}
           <div
-            className={`text-[11px] sm:text-xs font-mono uppercase tracking-[0.28em] mb-3 sm:mb-4 flex items-center gap-2 ${
-              isLight ? 'text-[#dfb776]' : 'text-[#dfb776]'
-            }`}
+            className="text-[11px] sm:text-xs font-mono uppercase tracking-[0.28em] mb-3 sm:mb-4 flex items-center gap-2 text-[#dfb776]"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#dfb776]" />
             <span>{currentItem.heroEyebrow || 'INDEPENDENT HOMES / CHENNAI, INDIA'}</span>
           </div>
 
@@ -245,11 +243,11 @@ export const ThreeHeroVilla: React.FC<ThreeHeroVillaProps> = ({
             }`}
           >
             {/* Card Header */}
-            <div className="flex items-center justify-between pb-2.5 border-b border-white/10 mb-3 sm:mb-4">
-              <span className={`text-[10px] font-mono tracking-[0.2em] uppercase ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
+            <div className={`flex items-center justify-between pb-2.5 border-b mb-3 sm:mb-4 ${isLight ? 'border-[#e6dfd3]' : 'border-white/10'}`}>
+              <span className={`text-[10px] font-mono tracking-[0.2em] uppercase ${isLight ? 'text-[#5b544d]' : 'text-gray-400'}`}>
                 SIGNATURE PROJECT
               </span>
-              <span className="text-[9px] font-mono tracking-widest uppercase border px-2 py-0.5 rounded-sm text-[#dfb776] border-[#dfb776]/40 bg-[#dfb776]/10 font-semibold">
+              <span className="text-[9px] font-mono tracking-widest uppercase text-[#9c723b] font-semibold">
                 ONGOING
               </span>
             </div>
@@ -258,54 +256,54 @@ export const ThreeHeroVilla: React.FC<ThreeHeroVillaProps> = ({
             <h3
               onClick={onExploreProjects}
               className={`font-serif-luxury text-xl sm:text-2xl font-bold mb-1.5 sm:mb-2 cursor-pointer transition-colors ${
-                isLight ? 'text-gray-900 hover:text-[#9b6f1e]' : 'text-white hover:text-[#dfb776]'
+                isLight ? 'text-[#161513] hover:text-[#9c723b]' : 'text-white hover:text-[#dfb776]'
               }`}
             >
               Mysa Luxe Villas
             </h3>
 
             {/* Active Perspective Info */}
-            <div className="mb-3 sm:mb-4 pb-2.5 sm:pb-3 border-b border-white/10">
-              <div className="text-xs font-mono text-[#dfb776] font-semibold mb-1">
+            <div className={`mb-3 sm:mb-4 pb-2.5 sm:pb-3 border-b ${isLight ? 'border-[#e6dfd3]' : 'border-white/10'}`}>
+              <div className={`text-xs font-mono font-semibold mb-1 ${isLight ? 'text-[#9c723b]' : 'text-[#dfb776]'}`}>
                 {currentItem.title}
               </div>
-              <div className={`text-[11px] leading-relaxed font-light ${isLight ? 'text-gray-700' : 'text-gray-300'}`}>
+              <div className={`text-[11px] leading-relaxed font-light ${isLight ? 'text-[#5b544d]' : 'text-gray-300'}`}>
                 {currentItem.description}
               </div>
             </div>
 
             {/* Spatial Specifications */}
-            <div className="space-y-1.5 sm:space-y-2 text-xs pb-2.5 sm:pb-3 border-b border-white/10 mb-3 font-mono">
+            <div className={`space-y-1.5 sm:space-y-2 text-xs pb-2.5 sm:pb-3 border-b mb-3 font-mono tabular-nums ${isLight ? 'border-[#e6dfd3]' : 'border-white/10'}`}>
               <div className="flex justify-between items-center">
-                <span className={`text-[10px] ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>AREA / VOLUME</span>
+                <span className={`text-[10px] ${isLight ? 'text-[#7b7269]' : 'text-gray-400'}`}>AREA / VOLUME</span>
                 <span className="text-[11px] font-semibold">{currentItem.area}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className={`text-[10px] ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>LOCATION</span>
+                <span className={`text-[10px] ${isLight ? 'text-[#7b7269]' : 'text-gray-400'}`}>LOCATION</span>
                 <span className="text-[11px] font-semibold">{currentItem.location}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className={`text-[10px] ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>PRIVACY</span>
-                <span className="text-[11px] font-semibold text-[#dfb776]">ZERO COMMON WALLS</span>
+                <span className={`text-[10px] ${isLight ? 'text-[#7b7269]' : 'text-gray-400'}`}>PRIVACY</span>
+                <span className={`text-[11px] font-semibold ${isLight ? 'text-[#9c723b]' : 'text-[#dfb776]'}`}>ZERO COMMON WALLS</span>
               </div>
             </div>
 
             {/* Feature Chips */}
-            <div className="grid grid-cols-2 gap-y-1.5 text-[11px] font-light mb-3 sm:mb-4 text-gray-300">
+            <div className={`grid grid-cols-2 gap-y-1.5 text-[11px] font-light mb-3 sm:mb-4 ${isLight ? 'text-[#3c3631]' : 'text-gray-300'}`}>
               <div className="flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-[#dfb776]" />
+                <Check className="w-3.5 h-3.5 text-[#b88c52]" />
                 <span>4 & 5 BHK Layouts</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-[#dfb776]" />
+                <Check className="w-3.5 h-3.5 text-[#b88c52]" />
                 <span>Private Lap Pool</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-[#dfb776]" />
+                <Check className="w-3.5 h-3.5 text-[#b88c52]" />
                 <span>Executive EV Bay</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-[#dfb776]" />
+                <Check className="w-3.5 h-3.5 text-[#b88c52]" />
                 <span>Gated Lotus Entry</span>
               </div>
             </div>
@@ -315,13 +313,13 @@ export const ThreeHeroVilla: React.FC<ThreeHeroVillaProps> = ({
               <button
                 onClick={onExploreProjects}
                 className={`text-[10px] font-mono tracking-widest uppercase transition-colors cursor-pointer flex items-center gap-1.5 ${
-                  isLight ? 'text-[#9b6f1e] hover:text-black font-semibold' : 'text-[#dfb776] hover:text-white'
+                  isLight ? 'text-[#9c723b] hover:text-[#161513] font-semibold' : 'text-[#dfb776] hover:text-white'
                 }`}
               >
                 <span>EXPLORE SHOWCASE</span>
                 <span>→</span>
               </button>
-              <span className="text-[9px] font-mono text-gray-400">
+              <span className={`text-[9px] font-mono ${isLight ? 'text-[#7b7269]' : 'text-gray-400'}`}>
                 4K ARCHITECTURE
               </span>
             </div>
@@ -360,34 +358,38 @@ export const ThreeHeroVilla: React.FC<ThreeHeroVillaProps> = ({
           </div>
 
           {/* Sub-footer: Scroll to Discover, Address & Direct Concierge */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 pt-2 border-t border-white/10 text-xs font-mono">
+          <div className={`flex flex-col sm:flex-row items-center justify-between gap-2.5 pt-2 border-t text-xs font-mono ${isLight ? 'border-[#e6dfd3]' : 'border-white/10'}`}>
             {/* Scroll Down */}
             <div className="flex items-center gap-2">
               {onScrollDown && (
                 <button
                   onClick={onScrollDown}
                   className={`flex items-center gap-2 text-[10px] tracking-[0.25em] uppercase transition-colors cursor-pointer group ${
-                    isLight ? 'text-gray-700 hover:text-[#9b6f1e]' : 'text-gray-400 hover:text-[#dfb776]'
+                    isLight ? 'text-[#5b544d] hover:text-[#9c723b]' : 'text-gray-400 hover:text-[#dfb776]'
                   }`}
                 >
                   <span>SCROLL TO DISCOVER</span>
-                  <ChevronDown className="w-3.5 h-3.5 group-hover:translate-y-0.5 transition-transform animate-bounce text-[#dfb776]" />
+                  <ChevronDown className="w-3.5 h-3.5 group-hover:translate-y-0.5 transition-transform text-[#b88c52]" />
                 </button>
               )}
             </div>
 
             {/* Address */}
-            <div className={`text-[10px] tracking-widest uppercase ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
-              EAST COAST ROAD / VETTUVANKENI • CHENNAI
+            <div className={`text-[10px] tracking-widest uppercase ${isLight ? 'text-[#5b544d]' : 'text-gray-400'}`}>
+              EAST COAST ROAD / VETTUVANKENI · CHENNAI
             </div>
 
             {/* Concierge Hotline */}
             <div className="flex items-center gap-3">
               <a
                 href="tel:+917358222445"
-                className="flex items-center gap-1.5 text-[10px] uppercase border px-3 py-1 rounded-xs transition-colors border-white/15 text-gray-300 hover:text-[#dfb776] hover:border-[#dfb776]/40 bg-black/40"
+                className={`flex items-center gap-1.5 text-[10px] uppercase border px-3 py-1 rounded-xs transition-colors ${
+                  isLight
+                    ? 'border-[#e6dfd3] text-[#161513] hover:text-[#9c723b] hover:border-[#b88c52] bg-white'
+                    : 'border-white/15 text-gray-300 hover:text-[#dfb776] hover:border-[#dfb776]/40 bg-black/40'
+                }`}
               >
-                <Phone className="w-3 h-3 text-[#dfb776]" />
+                <Phone className="w-3 h-3 text-[#b88c52]" />
                 <span>+91 73582 22445</span>
               </a>
 
@@ -395,9 +397,13 @@ export const ThreeHeroVilla: React.FC<ThreeHeroVillaProps> = ({
                 href="https://wa.me/917358222445"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-[10px] uppercase border px-3 py-1 rounded-xs transition-colors border-white/15 text-gray-300 hover:text-green-400 hover:border-green-500/40 bg-black/40"
+                className={`flex items-center gap-1.5 text-[10px] uppercase border px-3 py-1 rounded-xs transition-colors ${
+                  isLight
+                    ? 'border-[#e6dfd3] text-[#161513] hover:text-[#2a6b48] hover:border-[#2a6b48] bg-white'
+                    : 'border-white/15 text-gray-300 hover:text-green-400 hover:border-green-500/40 bg-black/40'
+                }`}
               >
-                <MessageCircle className="w-3 h-3 text-emerald-400" />
+                <MessageCircle className="w-3 h-3 text-emerald-600" />
                 <span>WHATSAPP</span>
               </a>
             </div>

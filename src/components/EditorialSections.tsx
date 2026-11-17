@@ -16,6 +16,7 @@ import {
   Check
 } from 'lucide-react';
 import { AppPage } from './Navbar';
+import { oceanfrontVillaTwilight, archInteriorLiving } from '../data/mockData';
 
 interface EditorialSectionsProps {
   onOpenConsultation: () => void;
@@ -96,7 +97,7 @@ export const EditorialSections: React.FC<EditorialSectionsProps> = ({
             className="lg:col-span-7 relative group rounded-sm overflow-hidden bg-[#121418] border border-white/10 min-h-[380px] sm:min-h-[480px] cursor-pointer"
           >
             <img
-              src="https://images.unsplash.com/photo-1613977257592-4871e5fcd7c4?auto=format&fit=crop&w=1600&q=80"
+              src={oceanfrontVillaTwilight}
               alt="Unifra Luxury Gated Villa Architecture & Lifestyle"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
               loading="lazy"
@@ -410,7 +411,7 @@ export const EditorialSections: React.FC<EditorialSectionsProps> = ({
           {/* Photo 1: Double-height window living room */}
           <div className="lg:col-span-4 relative group rounded-sm overflow-hidden bg-[#121418] border border-white/10 h-[380px] sm:h-[460px]">
             <img
-              src="/images/mysa3d/03.jpg"
+              src="/images/mysa3d/mysa-day.jpg"
               alt="The Material - Natural Light & Granite Balcony"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               loading="lazy"
@@ -480,8 +481,8 @@ export const EditorialSections: React.FC<EditorialSectionsProps> = ({
           {/* Left tall card: The Living Salon */}
           <div className="lg:col-span-5 relative group rounded-sm overflow-hidden bg-[#121418] border border-white/10 min-h-[420px] lg:min-h-[540px] dark-overlay-card">
             <img
-              src="/images/mysa3d/BAX09923.jpg"
-              alt="The Living Salon - MYSA Finished Residence Interior"
+              src={archInteriorLiving}
+              alt="The Living Salon - Travertine & Burmese Teak"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
               loading="lazy"
             />

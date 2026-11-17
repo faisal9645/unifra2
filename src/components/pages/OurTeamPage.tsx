@@ -15,8 +15,9 @@ export const OurTeamPage: React.FC<OurTeamPageProps> = ({
       name: 'Mr. Siddiq Ahmed',
       role: 'Founder',
       index: '01',
+      initials: 'SA',
       image: '/images/team/siddiq-ahmed.png',
-      bio: 'With a vision to redefine luxury living in Chennai, Mr. Siddiq Ahmed founded Unifra to create homes that blend contemporary aesthetics with timeless elegance. His leadership and passion for excellence are the driving forces behind our commitment to quality and innovation.',
+      bio: 'With a vision to redefine coastal living in Chennai, Mr. Siddiq Ahmed founded Unifra to create homes that blend contemporary Scandinavian discipline with timeless warmth.',
       linkedin: 'https://linkedin.com',
       email: 'siddiq@unifra.in'
     },
@@ -24,8 +25,9 @@ export const OurTeamPage: React.FC<OurTeamPageProps> = ({
       name: 'Nikesh Jothi Rajan',
       role: 'Project Manager',
       index: '02',
+      initials: 'NR',
       image: '/images/team/nikesh-rajan.png',
-      bio: 'As Project Manager, Nikesh orchestrates every phase of construction with precision and foresight. His expertise in timeline management and quality control ensures that every Unifra project is delivered on schedule and to the highest standards, turning blueprints into beautiful homes.',
+      bio: 'Nikesh orchestrates every phase of execution with structural precision and foresight, ensuring each residence meets exacting architectural tolerances and schedule discipline.',
       linkedin: 'https://linkedin.com',
       email: 'nikesh@unifra.in'
     },
@@ -33,89 +35,87 @@ export const OurTeamPage: React.FC<OurTeamPageProps> = ({
       name: 'Thunku Abdel Rehman',
       role: 'General Manager',
       index: '03',
-      image: 'https://ui-avatars.com/api/?name=Thunku+Abdel+Rehman&background=eae5dc&color=1a1918&size=800',
-      bio: 'As General Manager, Thunku Abdel Rehman brings operational discipline and a client-first mindset to every Unifra engagement. From transparent communication to meticulous handovers, he ensures the home-buying journey remains seamless and deeply satisfying for every family.',
+      initials: 'TR',
+      image: null,
+      bio: 'Thunku brings operational rigor and a client-first ethos to every Unifra engagement, guiding families seamlessly from initial briefing through final private handover.',
       linkedin: 'https://linkedin.com',
       email: 'info@unifra.in'
     }
   ];
 
   return (
-    <div className="pt-20 sm:pt-24 pb-12 sm:pb-14 bg-[#faf8f5] text-[#1a1918]">
+    <div className="pt-24 sm:pt-28 pb-16 bg-[#faf7f2] text-[#161513]">
       <div className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12">
-        {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-          <div className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] text-[#c59b67] mb-4 flex items-center justify-center gap-2">
-            <span className="w-1.5 h-1.5 bg-[#c59b67] rounded-full" />
-            <span>LEADERSHIP & ARCHITECTURAL MINDS</span>
-          </div>
-
-          <h1 className="font-serif-luxury text-5xl sm:text-7xl font-normal text-[#1a1918] tracking-tight mb-5">
-            Our <span className="italic font-serif-luxury text-[#c59b67]">Team</span>
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <span className="text-[11px] font-mono uppercase tracking-[0.26em] text-[#9a6f36] mb-3 block">
+            Leadership &amp; Master Builders
+          </span>
+          <h1 className="font-serif-luxury text-4xl sm:text-6xl font-normal text-[#161513] tracking-tight mb-5">
+            Our <span className="italic text-[#b88c52]">Team</span>
           </h1>
-          <p className="text-xs sm:text-sm text-[#68625d] font-light leading-relaxed">
-            Our strength lies in our individuality. Set up by Mr. Siddiq Ahmed, the team strives to bring in the best talent in various fields, from architecture to interior design and sales.
+          <p className="text-sm text-[#5a544e] font-light leading-relaxed">
+            Founded by Mr. Siddiq Ahmed, our studio unites architectural curators, structural engineers, and private client advisors dedicated to enduring craft.
           </p>
-
-          <div className="mt-10 flex items-center justify-center gap-4">
-            <span className="h-px w-16 bg-[#d8cebe]" />
-            <span className="text-[9px] font-mono tracking-[0.3em] text-[#8c827a] uppercase">Chennai • Est. 2022</span>
-            <span className="h-px w-16 bg-[#d8cebe]" />
-          </div>
         </div>
 
-        {/* Team Grid — vertical editorial profiles */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 mb-14">
+        {/* 3-Column Editorial Leadership Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-16">
           {teamMembers.map((member) => (
             <article key={member.name} className="group flex flex-col">
-              {/* Arched portrait */}
-              <div className="relative overflow-hidden rounded-t-[240px] rounded-b-[20px] border border-[#eae4db] bg-[#eae5dc] shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
-                <div className="aspect-[4/5] sm:aspect-[5/5]">
-                  <img
-                    src={member.image}
-                    alt={member.name}
-                    className="w-full h-full object-cover object-center group-hover:scale-[1.04] transition-transform duration-700 ease-out"
-                  />
+              <div className="relative overflow-hidden rounded-t-[200px] rounded-b-[16px] border border-[#e5ddd0] bg-[#e6dfd3] shadow-[0_18px_46px_rgba(22,21,19,0.06)]">
+                <div className="aspect-[4/5]">
+                  {member.image ? (
+                    <img
+                      src={member.image}
+                      alt={member.name}
+                      className="w-full h-full object-cover object-top group-hover:scale-[1.03] transition-transform duration-700 ease-out"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-[#efe8dc] flex flex-col items-center justify-center p-8">
+                      <div className="w-28 h-28 rounded-full border border-[#cbbda8] flex items-center justify-center mb-4 bg-[#faf7f2]">
+                        <span className="font-serif-luxury italic text-4xl text-[#9a6f36]">
+                          {member.initials}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-mono uppercase tracking-[0.24em] text-[#7c746b]">
+                        Unifra Leadership
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/45 via-transparent to-transparent pointer-events-none" style={{ height: '45%' }} />
-                <span className="absolute bottom-5 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-white/92 backdrop-blur-md border border-[#e5ded4] text-[9px] font-mono font-semibold uppercase tracking-[0.22em] text-[#1a1918]">
-                  {member.role}
-                </span>
-                <span className="absolute top-6 right-7 font-serif-luxury italic text-4xl text-white/85 drop-shadow-sm">
-                  {member.index}
-                </span>
               </div>
 
-              {/* Details */}
-              <div className="pt-8 sm:pt-9 flex-1 flex flex-col">
-                <h3 className="font-serif-luxury text-3xl sm:text-4xl font-normal text-[#1a1918] tracking-tight group-hover:text-[#9b6f1e] transition-colors">
-                  {member.name}
-                </h3>
-                <div className="mt-2 text-[10px] font-mono font-semibold uppercase tracking-[0.24em] text-[#c59b67]">
-                  {member.role} • Unifra
+              <div className="pt-7 flex-1 flex flex-col justify-between">
+                <div>
+                  <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#9a6f36] mb-1 tabular-nums">
+                    {member.index} · {member.role} · Unifra
+                  </div>
+                  <h2 className="font-serif-luxury text-2xl sm:text-3xl font-normal text-[#161513] tracking-tight">
+                    {member.name}
+                  </h2>
+                  <p className="mt-3 text-xs sm:text-sm text-[#5a544e] leading-relaxed font-light">
+                    {member.bio}
+                  </p>
                 </div>
-                <p className="mt-5 text-xs sm:text-sm text-[#68625d] leading-relaxed font-light">
-                  {member.bio}
-                </p>
 
-                <div className="mt-7 pt-5 border-t border-[#eae4db] flex items-center gap-3">
+                <div className="mt-6 pt-4 border-t border-[#e5ddd0] flex items-center gap-3">
                   <a
                     href={member.linkedin}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2.5 rounded-sm border border-[#d8cebe] text-[#68625d] hover:border-[#1a1918] hover:text-[#1a1918] transition-colors"
-                    title={`Connect with ${member.name} on LinkedIn`}
+                    className="p-2.5 rounded-sm border border-[#d6cbb9] text-[#5a544e] hover:border-[#161513] hover:text-[#161513] transition-colors"
+                    aria-label={`Connect with ${member.name} on LinkedIn`}
                   >
                     <Linkedin className="w-4 h-4" />
                   </a>
                   <a
                     href={`mailto:${member.email}`}
-                    className="p-2.5 rounded-sm border border-[#d8cebe] text-[#68625d] hover:border-[#1a1918] hover:text-[#1a1918] transition-colors"
-                    title={`Email ${member.name}`}
+                    className="p-2.5 rounded-sm border border-[#d6cbb9] text-[#5a544e] hover:border-[#161513] hover:text-[#161513] transition-colors"
+                    aria-label={`Email ${member.name}`}
                   >
                     <Mail className="w-4 h-4" />
                   </a>
-                  <span className="text-[10px] font-mono text-[#8c827a] tracking-wider truncate">
+                  <span className="text-[11px] font-mono text-[#7c746b] truncate">
                     {member.email}
                   </span>
                 </div>
@@ -124,26 +124,30 @@ export const OurTeamPage: React.FC<OurTeamPageProps> = ({
           ))}
         </div>
 
-        {/* Bottom Banner */}
-        <div className="bg-[#f4f0eb] rounded-[28px] p-10 sm:p-16 border border-[#e5ded4] shadow-sm text-center max-w-4xl mx-auto">
-          <span className="text-[10px] font-mono uppercase tracking-[0.28em] text-[#c59b67]">Collaborate</span>
-          <h3 className="mt-4 font-serif-luxury text-3xl sm:text-5xl font-normal text-[#1a1918] tracking-tight mb-4">
-            Want to collaborate with <span className="italic text-[#c59b67]">our leadership?</span>
+        {/* Bottom CTA */}
+        <div className="bg-[#f2ece2] rounded-[24px] p-10 sm:p-14 border border-[#e5ddd0] text-center max-w-4xl mx-auto">
+          <span className="text-[11px] font-mono uppercase tracking-[0.26em] text-[#9a6f36]">
+            Collaborate
+          </span>
+          <h3 className="mt-3 font-serif-luxury text-3xl sm:text-5xl font-normal text-[#161513] tracking-tight mb-4">
+            Speak directly with <span className="italic text-[#b88c52]">our leadership.</span>
           </h3>
-          <p className="text-xs sm:text-sm text-[#68625d] max-w-xl mx-auto mb-8 font-light leading-relaxed">
-            Whether you are exploring purchasing an exclusive villa or seeking architectural consultancy for your land parcel in Chennai, our team is at your disposal.
+          <p className="text-xs sm:text-sm text-[#5a544e] max-w-xl mx-auto mb-8 font-light leading-relaxed">
+            Whether exploring a MYSA residence or architectural consultancy for your coastal land parcel in Chennai, our studio is at your service.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <button
+              type="button"
               onClick={onNavigateContact}
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-sm bg-[#1a1918] hover:bg-[#2b2723] text-white text-xs font-mono uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-sm bg-[#161513] hover:bg-[#2a2723] text-[#faf7f2] text-xs font-mono uppercase tracking-[0.18em] transition-colors cursor-pointer"
             >
               <span>Schedule a Consultation</span>
               <ArrowRight className="w-3.5 h-3.5 text-[#c59b67]" />
             </button>
             <button
+              type="button"
               onClick={onNavigateStory}
-              className="inline-flex items-center gap-2 px-6 py-4 rounded-sm border border-[#d8cebe] text-[#1a1918] text-xs font-mono uppercase tracking-wider hover:border-[#1a1918] transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-sm border border-[#cbbda8] text-[#161513] text-xs font-mono uppercase tracking-[0.18em] hover:border-[#161513] transition-colors cursor-pointer"
             >
               <span>Read Our Story</span>
             </button>

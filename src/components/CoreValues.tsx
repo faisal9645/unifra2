@@ -6,57 +6,52 @@ export const CoreValues: React.FC = () => {
   const getIcon = (iconName: string) => {
     switch (iconName) {
       case 'Compass':
-        return <Compass className="w-6 h-6 text-[#c59b67]" />;
+        return <Compass className="w-5 h-5 text-[#b88c52]" />;
       case 'Zap':
-        return <Zap className="w-6 h-6 text-[#c59b67]" />;
+        return <Zap className="w-5 h-5 text-[#b88c52]" />;
       case 'Shield':
       default:
-        return <Shield className="w-6 h-6 text-[#c59b67]" />;
+        return <Shield className="w-5 h-5 text-[#b88c52]" />;
     }
   };
 
   return (
-    <section id="values" className="py-16 sm:py-24 bg-[#faf8f5] text-[#1a1918] relative border-t border-[#eee9e0]">
+    <section id="values" className="py-16 bg-[#f2ece2] text-[#161513] border-y border-[#e5ddd0]">
       <div className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12">
-        {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
-          <div className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] text-[#c59b67] mb-3 flex items-center justify-center gap-2">
-            <span className="w-1.5 h-1.5 bg-[#c59b67] rounded-full" />
-            <span>FOUNDATIONAL PILLARS</span>
-          </div>
-
-          <h2 className="font-serif-luxury text-3xl sm:text-5xl font-normal text-[#1a1918] tracking-tight mb-4">
-            Our Core <span className="italic font-serif-luxury text-[#c59b67]">Values</span>
+        <div className="text-center max-w-3xl mx-auto mb-12">
+          <span className="text-[11px] font-mono uppercase tracking-[0.26em] text-[#9a6f36] mb-2 block">
+            Foundational Pillars
+          </span>
+          <h2 className="font-serif-luxury text-3xl sm:text-5xl font-normal text-[#161513] tracking-tight mb-3">
+            Our Core <span className="italic text-[#b88c52]">Values</span>
           </h2>
-          <p className="text-[#68625d] text-xs sm:text-sm leading-relaxed max-w-xl mx-auto font-light">
-            The principles that define our work and our commitment to you.
+          <p className="text-[#5a544e] text-xs sm:text-sm leading-relaxed max-w-xl mx-auto font-light">
+            The principles that define our architecture and our commitment to every family.
           </p>
         </div>
 
-        {/* 3 Core Value Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {CORE_VALUES.map((val) => (
+          {CORE_VALUES.map((val, idx) => (
             <div
               key={val.id}
-              className="group relative bg-white rounded-[20px] p-8 sm:p-10 border border-[#eae4db] hover:border-[#c59b67] transition-all duration-300 transform hover:-translate-y-1.5 flex flex-col items-center text-center shadow-sm hover:shadow-lg"
+              className="bg-white rounded-[16px] p-8 border border-[#e5ddd0] hover:border-[#b88c52] transition-colors flex flex-col justify-between shadow-sm"
             >
-              {/* Circular Badge with Icon */}
-              <div className="w-14 h-14 rounded-full bg-[#c59b67]/10 border border-[#c59b67]/30 flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 group-hover:bg-[#1a1918] group-hover:text-white transition-all duration-300">
-                {getIcon(val.iconName)}
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <span className="text-xs font-mono text-[#b88c52] tabular-nums">
+                    0{idx + 1}
+                  </span>
+                  <div className="w-10 h-10 rounded-full bg-[#faf7f2] border border-[#e5ddd0] flex items-center justify-center">
+                    {getIcon(val.iconName)}
+                  </div>
+                </div>
+                <h3 className="font-serif-luxury text-2xl font-normal text-[#161513] mb-3">
+                  {val.title}
+                </h3>
+                <p className="text-[#5a544e] text-xs sm:text-sm leading-relaxed font-light">
+                  {val.description}
+                </p>
               </div>
-
-              {/* Title */}
-              <h3 className="font-serif-luxury text-xl sm:text-2xl font-bold text-[#1a1918] mb-3 group-hover:text-[#c59b67] transition-colors">
-                {val.title}
-              </h3>
-
-              {/* Description */}
-              <p className="text-[#68625d] text-xs sm:text-sm leading-relaxed font-light">
-                {val.description}
-              </p>
-
-              {/* Subtle hover accent mark */}
-              <div className="w-8 h-0.5 bg-[#eae4db] group-hover:w-16 group-hover:bg-[#c59b67] transition-all duration-300 mt-6" />
             </div>
           ))}
         </div>

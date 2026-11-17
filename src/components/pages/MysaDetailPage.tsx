@@ -26,10 +26,16 @@ import {
   Camera,
   KeyRound,
   ExternalLink,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Play
 } from 'lucide-react';
 
 import { ThreeHeroVilla } from '../ThreeHeroVilla';
+import {
+  archInteriorLiving,
+  coastalHorizonEcr,
+  oceanfrontVillaTwilight
+} from '../../data/mockData';
 
 export interface MysaPhoto {
   id: string;
@@ -59,8 +65,8 @@ export const MYSA_VILLA_PHOTOS: MysaPhoto[] = [
     category: 'Facade',
     categoryLabel: 'Facade & Architecture',
     location: 'West Elevation & Arrival Portico',
-    area: 'Villa 03 & 04 • Cantilever Terrace',
-    imageUrl: '/images/mysa3d/03.jpg',
+    area: 'Villa 03 & 04 · Cantilever Terrace',
+    imageUrl: '/images/mysa3d/mysa-day.jpg',
     description: 'Deep cantilevered dark granite balcony block with toughened glass balustrade, dual architectural satin brass sconces, integrated planter box, and double-car portico.'
   },
   {
@@ -69,29 +75,29 @@ export const MYSA_VILLA_PHOTOS: MysaPhoto[] = [
     category: 'Facade',
     categoryLabel: 'Facade & Architecture',
     location: 'Main Gated Enclave Avenue',
-    area: 'Full 3-Level Elevation • 5,800 Sq.Ft.',
+    area: 'Full 3-Level Elevation · 5,800 Sq.Ft.',
     imageUrl: '/images/mysa3d/mysa.jpg',
     description: 'Evening twilight view capturing warm 2700K interior illumination through double-height glass atriums and coastal reflection lap pool.'
   },
   {
     id: 'lotus-gate',
-    title: 'Illuminated Lotus Portal & Executive EV Portico',
+    title: 'Illuminated Oceanfront Pavilion & EV Portico',
     category: 'Facade',
     categoryLabel: 'Facade & Architecture',
     location: 'Gated Enclave Arrival Boulevard',
     area: 'Monolithic Gate Monument & Driveway',
-    imageUrl: '/images/mysa3d/BAX00768.jpg',
+    imageUrl: oceanfrontVillaTwilight,
     description: 'Monolithic black granite monument with illuminated brass lotus insignia, Belgian cobble arrival driveway, and covered executive EV portico.'
   },
   {
     id: 'furnished-salon',
-    title: 'Completed Furnished Living Salon & Media Console',
+    title: 'Completed Furnished Living Salon & Teak Joinery',
     category: 'Living',
     categoryLabel: 'Living & Great Room',
     location: 'Ground Level Residence',
     area: '680 Sq.Ft. Finished Suite',
-    imageUrl: '/images/mysa3d/BAX09923.jpg',
-    description: 'Authentic photograph of the completed ground-floor salon featuring bespoke teak armchairs, floating media console, sheer drapery, and warm recessed ambient lighting.'
+    imageUrl: archInteriorLiving,
+    description: 'Authentic coastal salon featuring bespoke Burmese teak armchairs, honed travertine floors, sheer linen drapery, and warm architectural daylight.'
   },
   {
     id: 'grand-living',
@@ -188,6 +194,7 @@ export const MysaDetailPage: React.FC<MysaDetailPageProps> = ({
 
   // Fullscreen Lightbox Modal state
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [isFilmPlaying, setIsFilmPlaying] = useState(false);
 
   const filteredPhotos = selectedCategory === 'All'
     ? MYSA_VILLA_PHOTOS
@@ -349,8 +356,7 @@ export const MysaDetailPage: React.FC<MysaDetailPageProps> = ({
           </button>
         )}
         <div className="flex items-center gap-2.5 ml-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-sm bg-[#c59b67]/15 border border-[#c59b67]/40 text-[#c59b67] text-[10px] font-mono uppercase tracking-widest font-semibold">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#c59b67] animate-pulse" />
+          <div className="inline-flex items-center gap-2 text-[#9c723b] text-[10px] font-mono uppercase tracking-[0.22em] font-semibold">
             <span>VIP CLIENT SHOWCASE UNLOCKED</span>
           </div>
 
@@ -379,9 +385,8 @@ export const MysaDetailPage: React.FC<MysaDetailPageProps> = ({
       {/* 1. Header */}
       <section className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12 mb-10">
         <div className="text-center max-w-4xl mx-auto">
-          <div className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] text-[#c59b67] mb-3 flex items-center justify-center gap-2">
-            <span className="w-1.5 h-1.5 bg-[#c59b67] rounded-full" />
-            <span>VETTUVANKENI, EAST COAST ROAD, CHENNAI</span>
+          <div className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] text-[#9c723b] mb-3">
+            <span>VETTUVANKENI · EAST COAST ROAD · CHENNAI</span>
           </div>
 
           <h1 className="font-serif-luxury text-3xl sm:text-5xl lg:text-6xl font-normal text-[#1a1918] tracking-tight mb-6 leading-[1.1]">
@@ -564,15 +569,15 @@ export const MysaDetailPage: React.FC<MysaDetailPageProps> = ({
 
         {/* Floor Plan Switcher Tabs */}
         <div className="flex justify-center mb-8">
-          <div className="inline-flex p-1 bg-white rounded-full border border-[#eae4db] shadow-sm">
+          <div className="inline-flex p-1 bg-white rounded-sm border border-[#e6dfd3] shadow-xs">
             {(['ground', 'first', 'second'] as const).map((key) => (
               <button
                 key={key}
                 onClick={() => setActiveFloorPlan(key)}
-                className={`px-4 sm:px-6 py-2 rounded-full text-[11px] font-mono uppercase tracking-wider transition-all cursor-pointer ${
+                className={`px-4 sm:px-6 py-2 rounded-xs text-[11px] font-mono uppercase tracking-wider transition-all cursor-pointer ${
                   activeFloorPlan === key
-                    ? 'bg-[#1a1918] text-white font-medium shadow-sm'
-                    : 'text-[#68625d] hover:text-[#1a1918]'
+                    ? 'bg-[#161513] text-white font-medium shadow-xs'
+                    : 'text-[#5b544d] hover:text-[#161513]'
                 }`}
               >
                 {key === 'ground' ? 'Ground Floor' : key === 'first' ? 'First Floor' : 'Second Floor'}
@@ -879,7 +884,7 @@ export const MysaDetailPage: React.FC<MysaDetailPageProps> = ({
 
             {/* Step 3 */}
             <div className="flex flex-col items-center text-center relative z-10">
-              <div className="w-12 h-12 rounded-full bg-[#c59b67] text-white flex items-center justify-center font-bold mb-3 shadow-md shadow-[#c59b67]/30 animate-pulse">
+              <div className="w-12 h-12 rounded-full bg-[#c59b67] text-white flex items-center justify-center font-bold mb-3 shadow-md shadow-[#c59b67]/30">
                 <Zap className="w-5 h-5" />
               </div>
               <h4 className="text-xs font-bold text-[#1a1918] mb-1">Electrical & Plumbing</h4>
@@ -944,8 +949,8 @@ export const MysaDetailPage: React.FC<MysaDetailPageProps> = ({
           {/* Location Map Visual */}
           <div className="rounded-[16px] overflow-hidden shadow-sm h-72 sm:h-96 relative bg-[#eae5dc] border border-[#eae4db]">
             <img
-              src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80"
-              alt="Chennai ECR Coastline Map"
+              src={coastalHorizonEcr}
+              alt="Chennai ECR Coastline Perspective"
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
@@ -966,9 +971,8 @@ export const MysaDetailPage: React.FC<MysaDetailPageProps> = ({
         <div className="bg-white rounded-[24px] border border-[#eae4db] overflow-hidden shadow-sm p-6 sm:p-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4 border-b border-[#eae4db] pb-6">
             <div className="text-left">
-              <div className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] text-[#c59b67] mb-2 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
-                <span>OFFICIAL YOUTUBE VILLA FILM</span>
+              <div className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] text-[#9a6f36] mb-2">
+                Official Walkthrough Film
               </div>
               <h2 className="font-serif-luxury text-2xl sm:text-4xl font-normal text-[#1a1918] tracking-tight">
                 MYSA Luxe Villas — <span className="italic font-serif-luxury text-[#c59b67]">Official Walkthrough Video</span>
@@ -979,15 +983,42 @@ export const MysaDetailPage: React.FC<MysaDetailPageProps> = ({
             </p>
           </div>
 
-          {/* YouTube Video Player Container */}
-          <div className="relative w-full aspect-video bg-[#eae5dc] rounded-[16px] overflow-hidden border border-[#eae4db] shadow-md">
-            <iframe
-              src="https://www.youtube.com/embed/XuMGAoSu3HE?rel=0&modestbranding=1"
-              title="MYSA Luxe Villas Official Walkthrough & Cinematic Film"
-              className="w-full h-full border-0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
+          {/* Click-to-Play Architectural Video Facade (prevents eager third-party iframe stalls) */}
+          <div className="relative w-full aspect-video bg-[#161513] rounded-sm overflow-hidden border border-[#e6dfd3] shadow-md">
+            {isFilmPlaying ? (
+              <iframe
+                src="https://www.youtube.com/embed/XuMGAoSu3HE?autoplay=1&rel=0&modestbranding=1"
+                title="MYSA Luxe Villas Official Walkthrough & Cinematic Film"
+                className="w-full h-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsFilmPlaying(true)}
+                className="relative w-full h-full group cursor-pointer text-left"
+                aria-label="Play MYSA Luxe Villas Official Walkthrough Video"
+              >
+                <img
+                  src={oceanfrontVillaTwilight}
+                  alt="MYSA Luxe Villas Official Walkthrough Film Cover"
+                  className="w-full h-full object-cover opacity-85 group-hover:scale-[1.02] transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-black/20" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#faf7f2] text-[#161513] flex items-center justify-center shadow-2xl group-hover:bg-[#dfb776] transition-colors mb-4">
+                    <Play className="w-6 h-6 sm:w-7 sm:h-7 fill-current ml-1" />
+                  </div>
+                  <span className="text-[11px] font-mono uppercase tracking-[0.26em] text-[#dfc08f] mb-1">
+                    Architectural Film · 03:45
+                  </span>
+                  <span className="font-serif-luxury text-2xl sm:text-3xl text-white font-normal">
+                    Play Official Walkthrough
+                  </span>
+                </div>
+              </button>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-4 mt-4 px-2 text-[10px] font-mono text-[#8c827a] uppercase tracking-widest">
@@ -1054,9 +1085,8 @@ export const MysaDetailPage: React.FC<MysaDetailPageProps> = ({
           <div className="absolute -bottom-28 -left-20 w-80 h-80 rounded-full bg-[#c59b67]/10 blur-3xl pointer-events-none" aria-hidden="true" />
 
           <div className="relative z-10 max-w-2xl text-center md:text-left">
-            <span className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-[#dfb776] font-semibold mb-3">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#dfb776] animate-pulse" />
-              LIMITED AVAILABILITY • 3 OF 6 VILLAS REMAINING
+            <span className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.24em] text-[#dfb776] font-semibold mb-3">
+              LIMITED AVAILABILITY · 3 OF 6 VILLAS REMAINING
             </span>
             <h3 className="font-serif-luxury text-3xl sm:text-4xl font-normal mb-3 leading-tight text-white">
               Interested in <span className="italic text-[#dfb776]">MYSA</span> Luxe Villas?

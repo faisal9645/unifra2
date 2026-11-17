@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { ProjectItem } from '../types';
 import { saveLead } from '../utils/leadsStorage';
+import { validateVillaAccessInput } from '../utils/portfolioUtils';
 
 export interface ClientDetails {
   name: string;
@@ -86,13 +87,10 @@ export const VillaAccessModal: React.FC<VillaAccessModalProps> = ({
     e.preventDefault();
     setErrorMessage('');
 
-    // Primary validation: Phone number and Email address mainly
-    if (!formData.phone.trim() || formData.phone.trim().length < 8) {
-      setErrorMessage('Please provide a valid contact phone number.');
-      return;
-    }
-    if (!formData.email.trim() || !formData.email.includes('@')) {
-      setErrorMessage('Please enter a valid email address.');
+    // Primary validation via shared portfolioUtils
+    const validation = validateVillaAccessInput(formData.phone, formData.email);
+    if (!validation.valid) {
+      setErrorMessage(validation.error || 'Please provide valid contact details.');
       return;
     }
 
@@ -144,15 +142,12 @@ export const VillaAccessModal: React.FC<VillaAccessModalProps> = ({
   const activeLocation = project ? project.location : 'Vettuvankeni, ECR Chennai';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl bg-[#faf8f5] rounded-[24px] shadow-2xl border border-[#eae4db] overflow-hidden text-[#1a1918]">
-        {/* Subtle decorative glow */}
-        <div className="absolute -top-20 -right-20 w-48 h-48 bg-[#c59b67]/10 rounded-full blur-3xl pointer-events-none" />
-
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#161513]/75 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-xl bg-[#faf7f2] rounded-sm shadow-2xl border border-[#e6dfd3] overflow-hidden text-[#161513]">
         {/* Modal Header */}
-        <div className="bg-[#f4f0eb] p-6 sm:p-7 flex items-start justify-between border-b border-[#eae4db] relative z-10">
+        <div className="bg-[#f2ece2] p-6 sm:p-7 flex items-start justify-between border-b border-[#e6dfd3] relative z-10">
           <div className="text-left flex items-start gap-3.5 sm:gap-4">
-            <div className="w-11 h-11 rounded-xs border border-[#c59b67]/30 bg-[#c59b67]/10 p-1 flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 rounded-sm border border-[#b88c52]/35 bg-[#faf7f2] p-1 flex items-center justify-center shrink-0">
               <img
                 src="/images/unifra-emblem.png"
                 alt="Unifra Insignia"
@@ -161,12 +156,12 @@ export const VillaAccessModal: React.FC<VillaAccessModalProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1.5">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm bg-[#c59b67]/15 border border-[#c59b67]/40 text-[#c59b67] text-[10px] font-mono uppercase tracking-widest font-semibold">
-                  <KeyRound className="w-3 h-3 text-[#c59b67]" />
+                <span className="inline-flex items-center gap-1.5 text-[#9c723b] text-[10px] font-mono uppercase tracking-[0.22em] font-semibold">
+                  <KeyRound className="w-3 h-3 text-[#b88c52]" />
                   <span>EXCLUSIVE VILLA SHOWCASE ACCESS</span>
                 </span>
               </div>
-              <h3 className="font-serif-luxury text-2xl sm:text-3xl font-normal text-[#1a1918]">
+              <h3 className="font-serif-luxury text-2xl sm:text-3xl font-normal text-[#161513]">
                 Unlock {activeProjectName}
               </h3>
               <p className="text-[#68625d] text-xs mt-1.5 font-light leading-relaxed max-w-md">
@@ -206,8 +201,8 @@ export const VillaAccessModal: React.FC<VillaAccessModalProps> = ({
               <p className="text-xs sm:text-sm text-[#68625d] max-w-md mx-auto leading-relaxed font-light">
                 Your credentials have been verified. Opening the full architectural showcase and floorplans...
               </p>
-              <div className="pt-2 flex items-center justify-center gap-2 text-xs font-mono text-[#c59b67]">
-                <span className="w-2 h-2 rounded-full bg-[#c59b67] animate-ping" />
+              <div className="pt-2 flex items-center justify-center gap-2 text-xs font-mono text-[#9c723b]">
+                <CheckCircle2 className="w-4 h-4 text-[#b88c52]" />
                 <span>Redirecting to Villa Showcase...</span>
               </div>
             </div>
