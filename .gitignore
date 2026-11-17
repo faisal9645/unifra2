@@ -6,3 +6,8 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Local-only Knowledge Graph & AI Agent rules
+graphify-out/
+.agents/
+
