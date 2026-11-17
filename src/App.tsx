@@ -1,334 +1,292 @@
-import React, { useState, useEffect } from 'react';
-import { Navbar, AppPage } from './components/Navbar';
-import { UnifraEditorialTemplate } from './components/UnifraEditorialTemplate';
-import { UnifraCompanyHero } from './components/UnifraCompanyHero';
-import { ThreeHeroVilla } from './components/ThreeHeroVilla';
-import { ThreeCarousel } from './components/ThreeCarousel';
-import { EditorialSections } from './components/EditorialSections';
-import { VirtualTourSection } from './components/VirtualTourSection';
-import { BlogSection } from './components/BlogSection';
-import { SignatureProjects } from './components/SignatureProjects';
-import { Footer } from './components/Footer';
-import { SmoothScroll, useLenis } from './components/SmoothScroll';
-import { CustomCursor } from './components/CustomCursor';
+import React, { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
+import { MessageCircle } from 'lucide-react';
 
-// Full dedicated subpages matching Unifra's complete award-winning website
+import { Navbar, AppPage } from './components/Navbar';
+import { Footer } from './components/Footer';
+import { Preloader } from './components/Preloader';
+import { CustomCursor } from './components/CustomCursor';
+import { SmoothScroll, useLenis } from './components/SmoothScroll';
+import { FilmModal, ArticleReaderModal } from './components/Overlays';
+import { VillaAccessModal, ClientDetails } from './components/VillaAccessModal';
+
+import { HomePage } from './components/pages/HomePage';
 import { AboutStoryPage } from './components/pages/AboutStoryPage';
 import { OurTeamPage } from './components/pages/OurTeamPage';
 import { SignatureProjectsPage } from './components/pages/SignatureProjectsPage';
 import { MysaDetailPage } from './components/pages/MysaDetailPage';
 import { ContactPage } from './components/pages/ContactPage';
+import { JournalPage } from './components/pages/JournalPage';
 import { VenturesCareersPage } from './components/pages/VenturesCareersPage';
-import { AdminLeadsPage } from './components/pages/AdminLeadsPage';
 
-import {
-  VirtualTourModal,
-  GalleryLightbox,
-  ArticleReaderModal
-} from './components/Modals';
-import { VillaAccessModal, ClientDetails } from './components/VillaAccessModal';
+import { gsap, ScrollTrigger, holdReveal, releaseReveal, prefersReducedMotion } from './lib/gsap';
 import { isVillaAccessUnlocked, setVillaAccessUnlocked } from './utils/leadsStorage';
 import { SIGNATURE_PROJECTS } from './data/mockData';
-import { Hotspot, GalleryItem, ProjectItem, BlogPost } from './types';
-import { MessageCircle, Phone, ArrowUp } from 'lucide-react';
+import { ProjectItem, BlogPost } from './types';
+
+const PAGE_LABELS: Record<AppPage, string> = {
+  home: 'Unifra',
+  projects: 'Residences',
+  'mysa-detail': 'MYSA Luxe Villas',
+  'about-story': 'Our Story',
+  'about-team': 'Leadership',
+  blog: 'Journal',
+  ventures: 'Ventures',
+  careers: 'Careers',
+  contact: 'Contact',
+  admin: 'Client Leads'
+};
+
+const PAGE_TITLES: Record<AppPage, string> = {
+  home: 'Unifra Properties — Coastal Sanctuaries, East Coast Road Chennai',
+  projects: 'Residences — Unifra Properties',
+  'mysa-detail': 'MYSA Luxe Villas, Vettuvankeni — Unifra Properties',
+  'about-story': 'Our Story — Unifra Properties',
+  'about-team': 'Leadership — Unifra Properties',
+  blog: 'Journal — Unifra Properties',
+  ventures: 'Joint Ventures & Land — Unifra Properties',
+  careers: 'Careers — Unifra Properties',
+  contact: 'Contact — Unifra Properties',
+  admin: 'Client Leads — Unifra Properties'
+};
+
+// The internal CRM is only fetched when /admin is opened
+const AdminLeadsPage = lazy(() => import('./components/pages/AdminLeadsPage').then((m) => ({ default: m.AdminLeadsPage })));
+
+const isMysa = (p?: ProjectItem | null) => Boolean(p && (p.id === 'mysa' || p.id === 'mysa-villas'));
 
 function AppContent() {
   const { scrollTo } = useLenis();
+  const [currentPage, setCurrentPage] = useState<AppPage>(() => {
+    const { pathname, hash } = window.location;
+    return pathname.startsWith('/admin') || hash === '#admin' ? 'admin' : 'home';
+  });
 
-  // Editorial Ivory Luxury Theme
-  const theme = 'light';
-
-  useEffect(() => {
-    document.body.classList.add('theme-light');
-    try {
-      localStorage.setItem('unifra_theme', 'light');
-    } catch {
-      // ignore
-    }
-  }, []);
-
-  // Page routing state
-  const [currentPage, setCurrentPage] = useState<AppPage>('home');
-
-  // Modal states
-  const [isVirtualTourOpen, setIsVirtualTourOpen] = useState(false);
-  const [selectedGalleryItem, setSelectedGalleryItem] = useState<GalleryItem | null>(null);
+  const [isFilmOpen, setIsFilmOpen] = useState(false);
   const [selectedBlogPost, setSelectedBlogPost] = useState<BlogPost | null>(null);
 
-  // Villa showcase gated access state
   const [isVillaUnlocked, setIsVillaUnlocked] = useState<boolean>(() => isVillaAccessUnlocked());
-  const [isVillaAccessModalOpen, setIsVillaAccessModalOpen] = useState(false);
-  const [pendingVillaProject, setPendingVillaProject] = useState<ProjectItem | null>(null);
-  const [villaAccessSource, setVillaAccessSource] = useState<string>('Villa Showcase Gate');
+  const [isGateOpen, setIsGateOpen] = useState(false);
+  const [gateProject, setGateProject] = useState<ProjectItem | null>(null);
+  const [gateSource, setGateSource] = useState('Villa Showcase Gate');
+  const [contactPresetInterest, setContactPresetInterest] = useState<string | undefined>(undefined);
 
-  // Listen for unlock state changes from admin portal or other components
+  // Concierge button appears once the visitor has moved past the opening view
+  const [showFab, setShowFab] = useState(false);
   useEffect(() => {
-    const handleUnlockChange = () => {
-      setIsVillaUnlocked(isVillaAccessUnlocked());
-    };
-    window.addEventListener('unifra_unlock_state_changed', handleUnlockChange);
-    return () => window.removeEventListener('unifra_unlock_state_changed', handleUnlockChange);
+    const onScroll = () => setShowFab(window.scrollY > window.innerHeight * 0.6);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Support direct navigation to /admin or #admin
+  const curtainRef = useRef<HTMLDivElement>(null);
+  const curtainLabelRef = useRef<HTMLSpanElement>(null);
+  const transitioning = useRef(false);
+
+  // Unlock state can change from the admin portal
   useEffect(() => {
-    const handleLocation = () => {
-      const path = window.location.pathname;
-      const hash = window.location.hash;
-      if (path === '/admin' || path.startsWith('/admin') || hash === '#admin') {
-        setCurrentPage('admin');
-      }
-    };
-    handleLocation();
-    window.addEventListener('popstate', handleLocation);
-    return () => window.removeEventListener('popstate', handleLocation);
+    const sync = () => setIsVillaUnlocked(isVillaAccessUnlocked());
+    window.addEventListener('unifra_unlock_state_changed', sync);
+    return () => window.removeEventListener('unifra_unlock_state_changed', sync);
   }, []);
 
-  // Sync URL when page changes to admin
+  // /admin deep link + back/forward
+  useEffect(() => {
+    const onPop = () => {
+      if (window.location.pathname.startsWith('/admin') || window.location.hash === '#admin') setCurrentPage('admin');
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
   useEffect(() => {
     if (currentPage === 'admin') {
-      if (window.location.pathname !== '/admin') {
-        window.history.pushState(null, '', '/admin');
-      }
+      if (window.location.pathname !== '/admin') window.history.pushState(null, '', '/admin');
     } else if (window.location.pathname === '/admin') {
       window.history.pushState(null, '', '/');
     }
+    document.title = PAGE_TITLES[currentPage];
   }, [currentPage]);
 
-  // Scroll to top button visibility
-  const [showScrollTop, setShowScrollTop] = useState(false);
+  /** Curtain transition: cover, swap the page at the top, then lift. */
+  const goTo = useCallback(
+    (page: AppPage) => {
+      if (transitioning.current) return;
+      if (page === currentPage) {
+        scrollTo(0, { duration: 1.6 });
+        return;
+      }
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 400);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+      const curtain = curtainRef.current;
+      const label = curtainLabelRef.current;
+      if (!curtain || !label || prefersReducedMotion()) {
+        setCurrentPage(page);
+        scrollTo(0, { immediate: true });
+        return;
+      }
 
-  const handleOpenVillaShowcase = (project?: ProjectItem | null, source = 'Villa Showcase Gate') => {
-    const targetProject = project || SIGNATURE_PROJECTS.find(p => p.id === 'mysa-villas') || null;
-    setPendingVillaProject(targetProject);
-    setVillaAccessSource(source);
-    if (isVillaUnlocked) {
-      setCurrentPage('mysa-detail');
-      scrollTo(0, { immediate: true });
-    } else {
-      setIsVillaAccessModalOpen(true);
-    }
+      transitioning.current = true;
+      label.textContent = PAGE_LABELS[page];
+      holdReveal();
+      const [under, over] = Array.from(curtain.querySelectorAll<HTMLElement>('[data-curtain]'));
+
+      gsap
+        .timeline({
+          onComplete: () => {
+            gsap.set(curtain, { autoAlpha: 0, pointerEvents: 'none' });
+            transitioning.current = false;
+          }
+        })
+        .set(curtain, { autoAlpha: 1, pointerEvents: 'auto' })
+        .fromTo(under, { yPercent: 100 }, { yPercent: 0, duration: 0.75, ease: 'expo.inOut' })
+        .fromTo(over, { yPercent: 100 }, { yPercent: 0, duration: 0.75, ease: 'expo.inOut' }, 0.09)
+        .fromTo(label, { yPercent: 110 }, { yPercent: 0, duration: 0.8, ease: 'expo.out' }, 0.5)
+        .add(() => {
+          scrollTo(0, { immediate: true });
+          flushSync(() => setCurrentPage(page));
+          ScrollTrigger.sort();
+          ScrollTrigger.refresh();
+        })
+        .to(label, { yPercent: -110, duration: 0.55, ease: 'expo.in' }, '+=0.2')
+        .add(() => releaseReveal(), '+=0.05')
+        .to(over, { yPercent: -100, duration: 0.85, ease: 'expo.inOut' }, '<')
+        .to(under, { yPercent: -100, duration: 0.85, ease: 'expo.inOut' }, '<0.1');
+    },
+    [currentPage, scrollTo]
+  );
+
+  const openVillaShowcase = (project?: ProjectItem | null, source = 'Villa Showcase Gate') => {
+    setGateProject(project || SIGNATURE_PROJECTS.find((p) => p.id === 'mysa-villas') || null);
+    setGateSource(source);
+    if (isVillaUnlocked) goTo('mysa-detail');
+    else setIsGateOpen(true);
   };
 
-  const handleVillaAccessSuccess = (_clientDetails: ClientDetails) => {
+  const handleGateSuccess = (_details: ClientDetails) => {
     setIsVillaUnlocked(true);
-    setIsVillaAccessModalOpen(false);
-    setCurrentPage('mysa-detail');
-    scrollTo(0, { immediate: true });
+    setIsGateOpen(false);
+    goTo('mysa-detail');
   };
 
-  const handleNavigatePage = (page: AppPage) => {
+  const navigate = (page: AppPage) => {
     if (page === 'mysa-detail' && !isVillaUnlocked) {
-      handleOpenVillaShowcase(SIGNATURE_PROJECTS.find(p => p.id === 'mysa-villas'), 'Navbar Menu - The Residences');
+      openVillaShowcase(null, 'Navigation — MYSA Villas');
       return;
     }
-    setCurrentPage(page);
-    scrollTo(0, { immediate: true });
+    if (page === 'contact') setContactPresetInterest(undefined);
+    goTo(page);
   };
 
-  const scrollToSection = (id: string) => {
-    if (currentPage !== 'home') {
-      setCurrentPage('home');
-      setTimeout(() => {
-        scrollTo(`#${id}`, { offset: -70, duration: 1.2 });
-      }, 120);
-    } else {
-      scrollTo(`#${id}`, { offset: -70, duration: 1.2 });
-    }
+  // Upcoming (non-MYSA) enclaves are unannounced — they route to the pre-release list
+  const openConsultation = (project?: ProjectItem) => {
+    setContactPresetInterest(project && !isMysa(project) ? 'Upcoming enclaves — early access' : undefined);
+    goTo('contact');
   };
 
-  // Unified inquiry form page: every general CTA routes to the Contact page.
-  // `contactPresetInterest` preselects the "I'm interested in" field.
-  const [contactPresetInterest, setContactPresetInterest] = useState<string | undefined>(undefined);
-
-  const handleOpenConsultation = (project?: ProjectItem) => {
-    setContactPresetInterest(
-      project && project.name !== 'MYSA Luxe Villas' ? `Project: ${project.name}` : undefined
-    );
-    setCurrentPage('contact');
-    scrollTo(0, { immediate: true });
+  const selectProject = (project: ProjectItem, source: string) => {
+    if (isMysa(project)) openVillaShowcase(project, source);
+    else openConsultation(project);
   };
+
+  const isAdmin = currentPage === 'admin';
 
   return (
-    <div className="relative min-h-screen bg-[#faf8f5] text-[#1a1918] font-sans antialiased selection:bg-[#c59b67]/25 selection:text-[#1a1918]">
-      {/* Precision Luxury Custom Cursor */}
-      <CustomCursor accentColor="#c59b67" />
+    <div className="relative min-h-screen bg-paper text-ink">
+      {!isAdmin && <Preloader />}
+      {!isAdmin && <CustomCursor />}
 
-      {/* 1. Global Navigation Bar */}
       <Navbar
         currentPage={currentPage}
-        onNavigatePage={handleNavigatePage}
-        onOpenContact={() => handleOpenConsultation()}
-        onOpenVillaAccess={(source) => handleOpenVillaShowcase(null, source || 'Navbar Menu - Mysa Villas')}
+        onNavigatePage={navigate}
+        onOpenContact={() => openConsultation()}
+        onOpenVillaAccess={(source) => openVillaShowcase(null, source || 'Navigation — MYSA Villas')}
         isVillaUnlocked={isVillaUnlocked}
+        overlay={currentPage === 'mysa-detail' || isAdmin}
       />
 
-      {/* 2. Main Body Content Based on Active Page */}
       <main className="relative">
         {currentPage === 'home' && (
-          <UnifraEditorialTemplate
-            onOpenConsultation={() => handleOpenConsultation()}
-            onNavigatePage={handleNavigatePage}
-            onOpenVillaAccess={(source) => handleOpenVillaShowcase(null, source || 'Editorial Home — Mysa Villas')}
-            onWatchFilm={() => setIsVirtualTourOpen(true)}
-            onSelectGalleryItem={(item) => setSelectedGalleryItem(item)}
-            onSelectProject={(project) => {
-              if (project.id === 'mysa' || project.id === 'mysa-villas') {
-                handleOpenVillaShowcase(project, 'Editorial Home — Select Card');
-              } else {
-                handleOpenConsultation(project);
-              }
-            }}
-            isVillaUnlocked={isVillaUnlocked}
-          />
-        )}
-
-        {currentPage === 'about-story' && (
-          <AboutStoryPage
-            onOpenContact={() => handleOpenConsultation()}
-            onNavigateTeam={() => handleNavigatePage('about-team')}
-            onNavigateContact={() => handleNavigatePage('contact')}
-            onNavigateProjects={() => handleNavigatePage('projects')}
-          />
-        )}
-
-        {currentPage === 'about-team' && (
-          <OurTeamPage
-            onNavigateContact={() => handleNavigatePage('contact')}
-            onNavigateStory={() => handleNavigatePage('about-story')}
-          />
+          <HomePage onNavigatePage={navigate} onSelectProject={(project) => selectProject(project, 'Home — Residences')} />
         )}
 
         {currentPage === 'projects' && (
           <SignatureProjectsPage
-            onSelectProject={(project) => {
-              if (project.id === 'mysa' || project.id === 'mysa-villas') {
-                handleOpenVillaShowcase(project, 'Projects Page - Select Card');
-              } else {
-                handleOpenConsultation(project);
-              }
-            }}
-            onExploreShowcase={(project) => {
-              if (project.id === 'mysa' || project.id === 'mysa-villas') {
-                handleOpenVillaShowcase(project, 'Projects Page - Explore Showcase');
-              } else {
-                handleOpenConsultation(project);
-              }
-            }}
-            onSelectMysa={() => handleOpenVillaShowcase(null, 'Projects Page - Hero Mysa')}
-            onOpenContact={() => handleOpenConsultation()}
+            onSelectProject={(project) => selectProject(project, 'Residences — Project card')}
+            onDownloadBrochure={() => openConsultation()}
             isVillaUnlocked={isVillaUnlocked}
           />
         )}
 
         {currentPage === 'mysa-detail' && (
           <MysaDetailPage
-            onOpenContact={() => handleOpenConsultation()}
-            onOpenVirtualTour={() => setIsVirtualTourOpen(true)}
-            onOpenBrochure={() => handleOpenConsultation()}
-            onNavigateProjects={() => handleNavigatePage('projects')}
+            onOpenContact={() => openConsultation()}
+            onOpenFilm={() => setIsFilmOpen(true)}
+            onNavigateProjects={() => navigate('projects')}
             onLockVilla={() => {
               setVillaAccessUnlocked(false);
               setIsVillaUnlocked(false);
-              handleNavigatePage('projects');
+              goTo('projects');
             }}
-            onNavigateAdmin={() => handleNavigatePage('admin')}
+            onNavigateAdmin={() => goTo('admin')}
           />
         )}
 
-        {currentPage === 'admin' && (
-          <AdminLeadsPage
-            onNavigateHome={() => handleNavigatePage('home')}
-            onNavigateVilla={() => handleNavigatePage('mysa-detail')}
-          />
+        {currentPage === 'about-story' && (
+          <AboutStoryPage onNavigateTeam={() => navigate('about-team')} onNavigateProjects={() => navigate('projects')} />
         )}
 
-        {currentPage === 'contact' && (
-          <ContactPage presetInterest={contactPresetInterest} />
+        {currentPage === 'about-team' && <OurTeamPage onNavigateStory={() => navigate('about-story')} />}
+
+        {currentPage === 'blog' && <JournalPage onReadArticle={setSelectedBlogPost} />}
+
+        {(currentPage === 'ventures' || currentPage === 'careers') && (
+          <VenturesCareersPage key={currentPage} type={currentPage} onOpenContact={() => openConsultation()} />
         )}
 
-        {currentPage === 'blog' && (
-          <div className="pt-20">
-            <BlogSection onReadArticle={(post) => setSelectedBlogPost(post)} />
-          </div>
-        )}
+        {currentPage === 'contact' && <ContactPage presetInterest={contactPresetInterest} />}
 
-        {currentPage === 'ventures' && (
-          <VenturesCareersPage
-            type="ventures"
-            onOpenContact={() => handleOpenConsultation()}
-          />
-        )}
-
-        {currentPage === 'careers' && (
-          <VenturesCareersPage
-            type="careers"
-            onOpenContact={() => handleOpenConsultation()}
-          />
+        {isAdmin && (
+          <Suspense fallback={<div className="min-h-screen bg-[#0b0c0e]" />}>
+            <AdminLeadsPage onNavigateHome={() => goTo('home')} onNavigateVilla={() => goTo('mysa-detail')} />
+          </Suspense>
         )}
       </main>
 
-      {/* 3. Global Comprehensive Footer */}
-      <Footer
-        onNavigatePage={handleNavigatePage}
-        onOpenContact={() => handleOpenConsultation()}
-      />
+      {!isAdmin && <Footer onNavigatePage={navigate} onOpenContact={() => openConsultation()} />}
 
-      {/* Floating Concierge Action Buttons */}
-      <div className="fixed bottom-5 right-5 z-40 flex flex-col items-center gap-2.5">
-        {showScrollTop && (
-          <button
-            type="button"
-            onClick={() => scrollTo(0, { duration: 1.2 })}
-            className="w-10 h-10 rounded-full bg-[#faf7f2]/95 backdrop-blur-md border border-[#d6cbb9] text-[#161513] shadow-lg flex items-center justify-center hover:border-[#b88c52] hover:text-[#b88c52] transition-all cursor-pointer"
-            aria-label="Scroll to top"
-          >
-            <ArrowUp className="w-4 h-4" />
-          </button>
-        )}
-
+      {!isAdmin && (
         <a
           href="https://wa.me/917358222445?text=Hello%20Unifra%2C%20I%20would%20like%20to%20know%20more%20about%20MYSA%20Luxe%20Villas."
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center w-11 h-11 rounded-full bg-[#161513] hover:bg-[#2a2723] border border-[#c59b67]/40 text-[#faf7f2] shadow-xl hover:scale-105 transition-all duration-200"
-          aria-label="Direct WhatsApp with Unifra Concierge"
+          aria-label="Chat with the Unifra concierge on WhatsApp"
+          className={`group fixed bottom-5 right-5 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-ink text-paper shadow-[0_12px_40px_rgba(15,15,14,0.25)] transition-[transform,opacity] duration-500 ease-luxe hover:scale-110 sm:bottom-8 sm:right-8 ${
+            showFab ? 'opacity-100' : 'pointer-events-none translate-y-4 opacity-0'
+          }`}
         >
-          <MessageCircle className="w-5 h-5 text-[#c59b67]" />
+          <MessageCircle className="h-5 w-5 text-gold" />
         </a>
+      )}
+
+      {/* Page curtain */}
+      <div ref={curtainRef} className="pointer-events-none invisible fixed inset-0 z-[200] opacity-0" aria-hidden="true">
+        <div data-curtain className="absolute inset-0 bg-stone" />
+        <div data-curtain className="absolute inset-0 flex items-center justify-center overflow-hidden bg-ink">
+          <span className="overflow-hidden">
+            <span ref={curtainLabelRef} className="block font-display text-[clamp(3rem,9vw,9rem)] italic leading-[1.1] text-paper" />
+          </span>
+        </div>
       </div>
 
-      {/* Global Interactive Modals */}
-      <VirtualTourModal
-        isOpen={isVirtualTourOpen}
-        onClose={() => setIsVirtualTourOpen(false)}
-      />
-
-      <GalleryLightbox
-        item={selectedGalleryItem}
-        onClose={() => setSelectedGalleryItem(null)}
-      />
-
-      <ArticleReaderModal
-        post={selectedBlogPost}
-        onClose={() => setSelectedBlogPost(null)}
-      />
-
-      {/* Gated Villa Showcase Registration Form Modal */}
+      <FilmModal isOpen={isFilmOpen} onClose={() => setIsFilmOpen(false)} />
+      <ArticleReaderModal post={selectedBlogPost} onClose={() => setSelectedBlogPost(null)} />
       <VillaAccessModal
-        isOpen={isVillaAccessModalOpen}
-        onClose={() => setIsVillaAccessModalOpen(false)}
-        project={pendingVillaProject}
-        onSuccess={handleVillaAccessSuccess}
-        source={villaAccessSource}
+        isOpen={isGateOpen}
+        onClose={() => setIsGateOpen(false)}
+        project={gateProject}
+        onSuccess={handleGateSuccess}
+        source={gateSource}
       />
     </div>
   );
@@ -341,4 +299,3 @@ export default function App() {
     </SmoothScroll>
   );
 }
-

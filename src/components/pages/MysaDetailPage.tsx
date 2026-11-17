@@ -1,1220 +1,944 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  ArrowRight,
   ArrowLeft,
-  Download,
-  MapPin,
-  CheckCircle2,
-  ChevronDown,
-  ChevronUp,
-  Shield,
-  Zap,
+  ArrowRight,
+  ArrowUpRight,
   BatteryCharging,
   Droplets,
   Layers,
+  Shield,
   Sparkles,
-  Clock,
-  Eye,
-  Check,
-  Compass,
-  FileText,
-  Maximize2,
-  ChevronLeft,
-  ChevronRight,
   X,
-  Filter,
-  Camera,
-  KeyRound,
-  ExternalLink,
-  Image as ImageIcon,
-  Play
+  Zap
 } from 'lucide-react';
-
-import { ThreeHeroVilla } from '../ThreeHeroVilla';
-import {
-  archInteriorLiving,
-  coastalHorizonEcr,
-  oceanfrontVillaTwilight
-} from '../../data/mockData';
+import { MEDIA, Media } from '../../data/media';
+import { Img } from '../ui';
+import { gsap, ScrollTrigger, useGSAP, prefersReducedMotion } from '../../lib/gsap';
+import { useScrollFx } from '../../hooks/useScrollFx';
+import { useLenis } from '../SmoothScroll';
+import { ScrollWorld, WorldChapter } from '../ScrollWorld';
 
 export interface MysaPhoto {
   id: string;
   title: string;
-  category: 'Facade' | 'Living' | 'Master Suite' | 'Kitchen & Dining' | 'Pool & Grounds' | 'Spa';
+  category: 'Facade' | 'Living' | 'Master Suite' | 'Kitchen & Dining';
   categoryLabel: string;
   location: string;
   area: string;
-  imageUrl: string;
+  media: Media;
   description: string;
 }
 
 export const MYSA_VILLA_PHOTOS: MysaPhoto[] = [
   {
     id: 'facade-butterfly',
-    title: 'Scandinavian Butterfly Pitched Roof & Clerestory',
+    title: 'Scandinavian butterfly pitched roof & clerestory',
     category: 'Facade',
-    categoryLabel: 'Facade & Architecture',
+    categoryLabel: 'Facade & architecture',
     location: 'MYSA Villas, Vettuvankeni ECR',
-    area: 'Villa 01 & 02 • Level 2 Gable',
-    imageUrl: '/images/mysa3d/02A.jpg',
+    area: 'Villa 01 & 02 · Level 2 gable',
+    media: MEDIA.facade,
     description: 'Signature Scandinavian butterfly pitched roof clad in dark bronze fascia with front-facing triangular clerestory gable glass and warm recessed soffit LED wash.'
   },
   {
     id: 'facade-granite',
-    title: 'Cantilevered Dark Granite Balcony & Sconces',
+    title: 'Coastal daylight facade & arrival courtyard',
     category: 'Facade',
-    categoryLabel: 'Facade & Architecture',
-    location: 'West Elevation & Arrival Portico',
-    area: 'Villa 03 & 04 · Cantilever Terrace',
-    imageUrl: '/images/mysa3d/mysa-day.jpg',
+    categoryLabel: 'Facade & architecture',
+    location: 'West elevation & arrival portico',
+    area: 'Villa 03 & 04 · Cantilever terrace',
+    media: MEDIA.beachVilla,
     description: 'Deep cantilevered dark granite balcony block with toughened glass balustrade, dual architectural satin brass sconces, integrated planter box, and double-car portico.'
   },
   {
     id: 'facade-dusk',
-    title: 'MYSA Dusk Elevation & Golden Interior Illumination',
+    title: 'MYSA dusk elevation & golden interior illumination',
     category: 'Facade',
-    categoryLabel: 'Facade & Architecture',
-    location: 'Main Gated Enclave Avenue',
-    area: 'Full 3-Level Elevation · 5,800 Sq.Ft.',
-    imageUrl: '/images/mysa3d/mysa.jpg',
+    categoryLabel: 'Facade & architecture',
+    location: 'Main gated enclave avenue',
+    area: 'Full 3-level elevation · 5,800 Sq.Ft.',
+    media: MEDIA.twilight,
     description: 'Evening twilight view capturing warm 2700K interior illumination through double-height glass atriums and coastal reflection lap pool.'
   },
   {
     id: 'lotus-gate',
-    title: 'Illuminated Oceanfront Pavilion & EV Portico',
+    title: 'Illuminated lotus gate & EV portico',
     category: 'Facade',
-    categoryLabel: 'Facade & Architecture',
-    location: 'Gated Enclave Arrival Boulevard',
-    area: 'Monolithic Gate Monument & Driveway',
-    imageUrl: oceanfrontVillaTwilight,
+    categoryLabel: 'Facade & architecture',
+    location: 'Gated enclave arrival boulevard',
+    area: 'Monolithic gate monument & driveway',
+    media: MEDIA.entranceNight,
     description: 'Monolithic black granite monument with illuminated brass lotus insignia, Belgian cobble arrival driveway, and covered executive EV portico.'
   },
   {
     id: 'furnished-salon',
-    title: 'Completed Furnished Living Salon & Teak Joinery',
+    title: 'Completed furnished living salon & teak joinery',
     category: 'Living',
-    categoryLabel: 'Living & Great Room',
-    location: 'Ground Level Residence',
-    area: '680 Sq.Ft. Finished Suite',
-    imageUrl: archInteriorLiving,
+    categoryLabel: 'Living & great room',
+    location: 'Ground level residence',
+    area: '680 Sq.Ft. finished suite',
+    media: MEDIA.salon,
     description: 'Authentic coastal salon featuring bespoke Burmese teak armchairs, honed travertine floors, sheer linen drapery, and warm architectural daylight.'
   },
   {
     id: 'grand-living',
-    title: 'Double-Height Great Room & Floating Oak Staircase',
+    title: 'Double-height great room & floating oak staircase',
     category: 'Living',
-    categoryLabel: 'Living & Great Room',
-    location: 'Ground Level Central Atrium',
-    area: '920 Sq.Ft. • 22-Ft Ceiling Volume',
-    imageUrl: '/images/mysa3d/LIVING-VIEW1.jpg',
+    categoryLabel: 'Living & great room',
+    location: 'Ground level central atrium',
+    area: '920 Sq.Ft. · 22-ft ceiling volume',
+    media: MEDIA.living,
     description: 'Expansive 22-foot double-height living room featuring floating timber cantilever staircase, double-ring gold chandelier, and imported composite Italian marble.'
   },
   {
     id: 'culinary-studio',
-    title: 'Minimalist Culinary Studio & Quartz Waterfall Island',
+    title: 'Minimalist culinary studio & quartz waterfall island',
     category: 'Kitchen & Dining',
-    categoryLabel: 'Dining & Kitchen',
-    location: 'Ground Level Culinary Suite',
-    area: '450 Sq.Ft. Gourmet Studio',
-    imageUrl: '/images/mysa3d/KITCHEN.jpg',
+    categoryLabel: 'Dining & kitchen',
+    location: 'Ground level culinary suite',
+    area: '450 Sq.Ft. gourmet studio',
+    media: MEDIA.kitchen,
     description: 'Seamless waterfall quartz kitchen island with breakfast bar, integrated premium appliances, Blum touch-to-open walnut joinery, and concealed ambient channels.'
   },
   {
     id: 'mezzanine-lounge',
-    title: 'First Floor Family Mezzanine Lounge & Media Salon',
+    title: 'First floor family mezzanine lounge & media salon',
     category: 'Living',
-    categoryLabel: 'Living & Great Room',
-    location: 'First Level Entertainment Wing',
+    categoryLabel: 'Living & great room',
+    location: 'First level entertainment wing',
     area: '580 Sq.Ft.',
-    imageUrl: '/images/mysa3d/LOUNGE.jpg',
+    media: MEDIA.lounge,
     description: 'Intimate first-floor family salon and media lounge with bespoke floating credenza, designer sculptural seating, and warm engineered timber flooring.'
   },
   {
     id: 'master-sanctuary',
-    title: 'Master Sanctuary Loft Suite & Timber Rafters',
+    title: 'Master sanctuary loft suite & timber rafters',
     category: 'Master Suite',
-    categoryLabel: 'Master Sanctuary & Suites',
-    location: 'First Level East Wing',
-    area: '650 Sq.Ft. • Cathedral Volume',
-    imageUrl: '/images/mysa3d/MASTER-BEDROOM5.jpg',
+    categoryLabel: 'Suites & sanctuaries',
+    location: 'First level east wing',
+    area: '650 Sq.Ft. · cathedral volume',
+    media: MEDIA.master,
     description: 'Cathedral volume master suite under the butterfly pitched roof with exposed natural timber rafters, plush king bed suite, and floor-to-ceiling balcony glazing.'
   },
   {
     id: 'first-floor-suite',
-    title: 'First Floor Luxury Guest Haven with Wood Slat Accent',
+    title: 'First floor guest haven with wood slat accent',
     category: 'Master Suite',
-    categoryLabel: 'Master Sanctuary & Suites',
-    location: 'First Level North Wing',
-    area: '480 Sq.Ft. Ensuite',
-    imageUrl: '/images/mysa3d/first-floor-bedroom.jpg',
+    categoryLabel: 'Suites & sanctuaries',
+    location: 'First level north wing',
+    area: '480 Sq.Ft. ensuite',
+    media: MEDIA.bedroomFirst,
     description: 'First floor ensuite bedroom featuring vertical wood slat headboard, integrated warm cove backlighting, and floor-to-ceiling garden glazing.'
   },
   {
     id: 'ground-floor-suite',
-    title: 'Ground Floor Garden Suite & Pool Walkout',
+    title: 'Ground floor garden suite & pool walkout',
     category: 'Master Suite',
-    categoryLabel: 'Master Sanctuary & Suites',
-    location: 'Ground Level Garden Wing',
-    area: '460 Sq.Ft. Ensuite',
-    imageUrl: '/images/mysa3d/ground-floor-bedroom.jpg',
+    categoryLabel: 'Suites & sanctuaries',
+    location: 'Ground level garden wing',
+    area: '460 Sq.Ft. ensuite',
+    media: MEDIA.bedroomGround,
     description: 'Ground level bedroom with floor-to-ceiling acoustic sliding glass doors opening directly to the private garden courtyard and lap pool.'
   }
 ];
 
+const FILTERS: Array<{ id: string; label: string }> = [
+  { id: 'All', label: 'All' },
+  { id: 'Facade', label: 'Facade' },
+  { id: 'Living', label: 'Living' },
+  { id: 'Master Suite', label: 'Suites' },
+  { id: 'Kitchen & Dining', label: 'Culinary' }
+];
+
+const FACTS = [
+  { value: '06', label: 'Exclusive villas' },
+  { value: '4,450–5,800', label: 'Sq.Ft. built-up' },
+  { value: '4 & 5', label: 'BHK, Swedish design' },
+  { value: 'G + 2', label: 'Levels with private pool' },
+  { value: 'Q1 2027', label: 'Scheduled handover' }
+];
+
+type FloorKey = 'ground' | 'first' | 'second';
+interface Room {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  label: string;
+}
+
+const FLOORS: Record<FloorKey, { tab: string; title: string; area: string; description: string; highlights: string[]; rooms: Room[] }> = {
+  ground: {
+    tab: 'Ground',
+    title: 'Ground floor',
+    area: '1,800 sq.ft.',
+    description:
+      'Grand entrance foyer leading to expansive double-height living room, guest bedroom suite, modern open kitchen with pantry, powder room, covered dual-car garage, and private outdoor swimming deck with landscaped plunge pool.',
+    highlights: ['Double-height living & dining', 'Private lap pool & deck', 'Chef kitchen with prep island', 'Guest suite with garden view'],
+    rooms: [
+      { x: 10, y: 10, w: 170, h: 150, label: 'Double-height living' },
+      { x: 180, y: 10, w: 100, h: 100, label: 'Dining' },
+      { x: 280, y: 10, w: 110, h: 100, label: 'Kitchen' },
+      { x: 180, y: 110, w: 120, h: 100, label: 'Guest suite' },
+      { x: 300, y: 110, w: 90, h: 50, label: 'Powder' },
+      { x: 300, y: 160, w: 90, h: 50, label: 'Stair' },
+      { x: 10, y: 160, w: 170, h: 130, label: 'Covered garage' },
+      { x: 180, y: 210, w: 210, h: 80, label: 'Lap pool & deck' }
+    ]
+  },
+  first: {
+    tab: 'First',
+    title: 'First floor',
+    area: '2,400 sq.ft.',
+    description:
+      'Master sanctuary suite with Scandinavian timber paneling, private sunrise balcony, walk-in dressing lounge, spa bathroom with freestanding soaking tub, plus two secondary ensuite bedrooms and family lounge.',
+    highlights: ['Master suite with walk-in closet', 'Private sun deck balconies', 'Central family lounge', 'Luxury ensuite bathrooms'],
+    rooms: [
+      { x: 10, y: 10, w: 190, h: 150, label: 'Master sanctuary' },
+      { x: 200, y: 10, w: 90, h: 70, label: 'Walk-in' },
+      { x: 290, y: 10, w: 100, h: 70, label: 'Spa bath' },
+      { x: 200, y: 80, w: 190, h: 80, label: 'Family lounge' },
+      { x: 10, y: 160, w: 150, h: 130, label: 'Bedroom two' },
+      { x: 160, y: 160, w: 140, h: 130, label: 'Bedroom three' },
+      { x: 300, y: 160, w: 90, h: 130, label: 'Sun balcony' }
+    ]
+  },
+  second: {
+    tab: 'Second',
+    title: 'Second floor & terrace',
+    area: '1,600 sq.ft.',
+    description:
+      'Entertainment lounge / home theater studio, fitness wellness studio, barbecue terrace overlooking coastal treetops, covered pergola seating, and utility laundry area.',
+    highlights: ['Rooftop stargazing terrace', 'Private gymnasium / studio', 'Pergola covered seating', 'Solar & DG integration zone'],
+    rooms: [
+      { x: 10, y: 10, w: 180, h: 140, label: 'Home theatre' },
+      { x: 190, y: 10, w: 200, h: 140, label: 'Wellness studio' },
+      { x: 10, y: 150, w: 260, h: 140, label: 'Pergola terrace' },
+      { x: 270, y: 150, w: 120, h: 60, label: 'Utility' },
+      { x: 270, y: 210, w: 120, h: 80, label: 'Solar & DG' }
+    ]
+  }
+};
+
+const AMENITIES = [
+  { icon: Droplets, title: 'Private pools', desc: 'Dedicated temperature-balanced lap pools in each individual villa with perimeter timber sun deck.' },
+  { icon: Zap, title: '24/7 power backup', desc: '100% DG generator backup covering all central air-conditioners, elevators, and appliances automatically.' },
+  { icon: Sparkles, title: 'Smart home automation', desc: 'Integrated app-controlled mood lighting, digital smart door locks, and video door surveillance.' },
+  { icon: Layers, title: 'Landscaped gardens', desc: 'Curated botanical courtyard gardens with native tropical flora and automatic drip irrigation.' },
+  { icon: Shield, title: 'Biometric security', desc: 'Manned gated entry with computerized visitor verification, boom barriers, and HD infrared CCTV coverage.' },
+  { icon: BatteryCharging, title: 'EV charging stations', desc: 'High-speed dedicated fast-charging wallbox provisions in every covered private two-car portico.' }
+];
+
+const SPECS: Array<{ key: string; label: string; items: Array<[string, string]> }> = [
+  {
+    key: 'painting',
+    label: 'Painting & finishes',
+    items: [
+      ['External walls', 'Weather-resistant acrylic exterior emulsion with textured protective coating'],
+      ['Internal walls', 'Smooth Asian Paints Royal Luxury plastic emulsion over dual skim coats of putty'],
+      ['Ceilings', 'Premium acrylic emulsion paint in pure matte architectural white'],
+      ['Driveway & car park', 'Heavy-duty exterior pavers with non-slip polyurethane sealant coating']
+    ]
+  },
+  {
+    key: 'plumbing',
+    label: 'Plumbing & sanitary',
+    items: [
+      ['Sanitary ware', 'Wall-hung rimless ceramic water closets with soft-close seat covers (Kohler / Grohe)'],
+      ['CP fittings', 'Premium concealed thermostatic diverters with multi-flow rain showerheads'],
+      ['Hot water supply', 'Centralized heat-pump solar water heating with instant recirculation'],
+      ['Piping', 'CPVC & UPVC lead-free piping with dedicated hydro-pneumatic pressure boosting']
+    ]
+  },
+  {
+    key: 'electrical',
+    label: 'Electrical & automation',
+    items: [
+      ['Wiring & cables', 'Concealed copper wiring with FRLS (flame retardant low smoke) insulation'],
+      ['Switches & plates', 'Legrand Arteor / Schneider modular switches with brushed metallic plates'],
+      ['Power backup', '100% DG power backup with automatic changeover switch (AMF)'],
+      ['Smart home', 'App-controlled lighting automation, video door phone, and motorized curtain provision']
+    ]
+  },
+  {
+    key: 'flooring',
+    label: 'Flooring & wall tiling',
+    items: [
+      ['Living & dining', 'Imported Italian composite marble slabs with mirror polish finish'],
+      ['Master bedroom', 'High-density engineered Scandinavian natural oak wooden flooring'],
+      ['Bathrooms', 'Full-body vitrified anti-skid floor tiles with full-height designer wall dado'],
+      ['Pool deck & balcony', 'Exterior weatherproof composite wood decking and flamed granite accents']
+    ]
+  },
+  {
+    key: 'joinery',
+    label: 'Joinery & glazing',
+    items: [
+      ['Main entrance door', '8-foot high Burma teak wood frame and shutter with Yale biometric digital lock'],
+      ['Internal doors', 'Solid core flush doors finished with natural timber veneer and Hafele hardware'],
+      ['Windows & sliders', 'Schüco / Saint-Gobain heavy-gauge acoustic aluminum sliding doors with toughened DGU glass'],
+      ['Balcony railings', 'Laminated toughened structural glass railings with minimalist SS 316 handrails']
+    ]
+  },
+  {
+    key: 'ventilation',
+    label: 'Ventilation & air',
+    items: [
+      ['HVAC provisions', 'Concealed copper piping & drainage designed for Daikin / Mitsubishi VRV multi-split systems'],
+      ['Cross-ventilation', 'Optimal Scandinavian passive airflow orientation capturing cool Bay of Bengal evening breezes'],
+      ['Kitchen & bath exhaust', 'Low-noise inline acoustic centrifugal exhaust ducts in all wet zones'],
+      ['Skylight wells', 'Thermal-insulated double-glazed skylight wells over internal courtyard atriums']
+    ]
+  }
+];
+
+const STAGES = [
+  { title: 'Foundation & structure', status: '100% complete', state: 'done' },
+  { title: 'Blockwork & plastering', status: '100% complete', state: 'done' },
+  { title: 'Electrical & plumbing', status: 'In progress — 85%', state: 'active' },
+  { title: 'Finishing touches', status: 'Q4 2026', state: 'next' },
+  { title: 'Handover', status: 'Q1 2027', state: 'next' }
+] as const;
+
+const PLACES = [
+  { min: 3, place: 'Prarthana Beach & ECR Drive-In' },
+  { min: 8, place: 'The British International School & Gateway International' },
+  { min: 12, place: 'Thiruvanmiyur & TIDEL IT Park, OMR' },
+  { min: 18, place: 'Adyar, Boat Club & Apollo Hospital' }
+];
+
+const FAQ = [
+  {
+    q: 'What is the total area of the MYSA Luxe Villas?',
+    a: 'Each MYSA Luxe Villa features a generous built-up area ranging from 4,450 to 5,800 square feet spread across three expansive levels, set on an individual land parcel of 2,800 to 3,600 square feet with a private pool and private parking for 2–3 luxury vehicles.'
+  },
+  {
+    q: 'Are the villas part of a gated community?',
+    a: 'Yes. MYSA is an exclusive, highly secure private gated enclave of only 6 bespoke residences in Vettuvankeni, ECR. The community features 24/7 security personnel, biometric gate access, CCTV perimeter coverage, and dedicated maintenance staff.'
+  },
+  {
+    q: 'What smart home features are included?',
+    a: 'Every villa is equipped with integrated home automation including smart app-controlled mood lighting, biometric front door access with digital passcode and mechanical override, integrated video door phone, smart climate control provisions, and sensor-activated security alerts.'
+  },
+  {
+    q: 'Is there a power backup facility?',
+    a: 'Yes, 100% complete diesel generator (DG) power backup is provided for every villa, including all air-conditioning units, home elevators, pool pumps, and general lighting with seamless automatic changeover switches.'
+  },
+  {
+    q: 'What are the customization options available?',
+    a: 'Homeowners who secure a villa during construction can select customized interior flooring materials, customized kitchen cabinetry designs, optional private hydraulic glass elevators, and bespoke landscape configurations for the poolside garden.'
+  }
+];
+
+const WORLD_CHAPTERS: WorldChapter[] = [
+  { t0: 0, t1: 1, label: 'Arrival', eyebrow: 'Vettuvankeni · East Coast Road · Chennai', title: 'MYSA Luxe Villas', body: 'A private gated enclave of six Scandinavian pool villas — arriving through the illuminated lotus gate.' },
+  { t0: 1, t1: 2.5, label: 'Facade', eyebrow: 'Scandinavian elevation', title: 'Butterfly roofs, cedar & granite', body: 'Asymmetrical butterfly rooflines, triangular clerestory glass, horizontal cedar cladding and cantilevered dark granite.' },
+  { t0: 2.5, t1: 4, label: 'Great room', eyebrow: '22-ft volume', title: 'The double-height great room', body: 'An architectural ring chandelier and full-height glazing beneath a 22-foot ceiling.' },
+  { t0: 4, t1: 5.5, label: 'Living & dining', eyebrow: 'Ground level heart', title: 'A floating oak staircase', body: 'Cantilevered timber treads rise beside an open dining salon filled with coastal daylight.' },
+  { t0: 5.5, t1: 7, label: 'Family lounge', eyebrow: 'Level 1 retreat', title: 'The family media salon', body: 'Acoustic timber slats, low-profile Scandinavian furnishings and views over the great room atrium.' },
+  { t0: 7, t1: 8.5, label: 'Kitchen', eyebrow: 'Culinary studio', title: 'Minimal, made to cook', body: 'European modular cabinetry with Blum touch-to-open joinery, a bookmatched marble splashback and concealed appliances.' },
+  { t0: 8.5, t1: 10, label: 'Suites', eyebrow: 'Master sanctuary', title: 'Suites that slow the day', body: 'Vertical fluted timber, floating bedside consoles and warm ambient cove light in every en-suite bedroom.' }
+];
+
 interface MysaDetailPageProps {
   onOpenContact: () => void;
-  onOpenVirtualTour: () => void;
-  onOpenBrochure: () => void;
+  onOpenFilm: () => void;
   onNavigateProjects?: () => void;
   onLockVilla?: () => void;
   onNavigateAdmin?: () => void;
 }
 
+/* In-page archive viewer with keyboard navigation */
+const ArchiveViewer: React.FC<{ index: number; onChange: (i: number) => void; onClose: () => void }> = ({ index, onChange, onClose }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const { setLocked } = useLenis();
+  const photo = MYSA_VILLA_PHOTOS[index];
+  const count = MYSA_VILLA_PHOTOS.length;
+
+  useEffect(() => {
+    setLocked(true);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'ArrowRight') onChange((index + 1) % count);
+      if (e.key === 'ArrowLeft') onChange((index - 1 + count) % count);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      setLocked(false);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [index, count, onChange, onClose, setLocked]);
+
+  useGSAP(
+    () => {
+      if (prefersReducedMotion()) return;
+      gsap.fromTo('[data-viewer-img]', { autoAlpha: 0, scale: 1.04 }, { autoAlpha: 1, scale: 1, duration: 0.9, ease: 'expo.out' });
+      gsap.from('[data-viewer-copy] > *', { y: 20, autoAlpha: 0, stagger: 0.05, duration: 0.8, ease: 'expo.out' });
+    },
+    { dependencies: [index], scope: ref }
+  );
+
+  return (
+    <div ref={ref} className="fixed inset-0 z-[120] flex flex-col bg-paper text-ink" role="dialog" aria-modal="true" aria-label={photo.title}>
+      <div className="shell flex items-center justify-between py-4">
+        <p className="text-[13px] tabular-nums text-graphite">
+          {String(index + 1).padStart(2, '0')} / {String(count).padStart(2, '0')} — {photo.categoryLabel}
+        </p>
+        <button
+          type="button"
+          onClick={onClose}
+          className="group flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-line-strong hover:bg-ink hover:text-paper"
+          aria-label="Close"
+        >
+          <X className="h-4 w-4 transition-transform duration-500 group-hover:rotate-90" />
+        </button>
+      </div>
+      <div className="relative min-h-0 flex-1 px-4 sm:px-16">
+        <img data-viewer-img key={photo.id} src={photo.media.src} alt={photo.title} className="h-full w-full object-contain" />
+        <button
+          type="button"
+          onClick={() => onChange((index - 1 + count) % count)}
+          className="absolute left-2 top-1/2 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-paper/90 shadow-sm hover:bg-ink hover:text-paper sm:left-6"
+          aria-label="Previous photograph"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => onChange((index + 1) % count)}
+          className="absolute right-2 top-1/2 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-paper/90 shadow-sm hover:bg-ink hover:text-paper sm:right-6"
+          aria-label="Next photograph"
+        >
+          <ArrowRight className="h-4 w-4" />
+        </button>
+      </div>
+      <div data-viewer-copy className="shell grid gap-2 py-5 sm:grid-cols-12 sm:items-end sm:gap-8">
+        <h3 className="font-display text-[clamp(1.6rem,2.6vw,2.4rem)] leading-[1.05] sm:col-span-5">{photo.title}</h3>
+        <p className="text-[14px] leading-relaxed text-graphite sm:col-span-5">{photo.description}</p>
+        <p className="text-[13px] text-graphite sm:col-span-2 sm:text-right">{photo.area}</p>
+      </div>
+    </div>
+  );
+};
+
 export const MysaDetailPage: React.FC<MysaDetailPageProps> = ({
   onOpenContact,
-  onOpenVirtualTour,
-  onOpenBrochure,
+  onOpenFilm,
   onNavigateProjects,
   onLockVilla,
   onNavigateAdmin
 }) => {
-  // Floor plan active tab
-  const [activeFloorPlan, setActiveFloorPlan] = useState<'ground' | 'first' | 'second'>('ground');
+  const pageRef = useRef<HTMLDivElement>(null);
+  const planRef = useRef<HTMLDivElement>(null);
+  const planCopyRef = useRef<HTMLDivElement>(null);
+  const archiveRef = useRef<HTMLDivElement>(null);
+  const specRef = useRef<HTMLDivElement>(null);
+  const settled = useRef({ floor: false, spec: false });
+  const [filter, setFilter] = useState('All');
+  const [viewer, setViewer] = useState<number | null>(null);
+  const [floor, setFloor] = useState<FloorKey>('ground');
+  const [spec, setSpec] = useState(SPECS[0].key);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  // Specs active category tab
-  const [activeSpecCategory, setActiveSpecCategory] = useState<
-    'painting' | 'plumbing' | 'electrical' | 'flooring' | 'joinery' | 'ventilation'
-  >('painting');
+  const photos = filter === 'All' ? MYSA_VILLA_PHOTOS : MYSA_VILLA_PHOTOS.filter((p) => p.category === filter);
+  const activeSpec = SPECS.find((s) => s.key === spec) || SPECS[0];
+  const plan = FLOORS[floor];
 
-  // FAQ expanded state
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  // Hero image settles as the page scrolls; progress line & ruler draw in
+  useGSAP(
+    () => {
+      if (prefersReducedMotion()) return;
+      gsap.from('[data-progress-fill]', {
+        scaleX: 0,
+        scaleY: 0,
+        duration: 2.2,
+        ease: 'expo.inOut',
+        scrollTrigger: { trigger: '[data-progress]', start: 'top 80%', once: true }
+      });
+      gsap.from('[data-ruler-mark]', {
+        scale: 0,
+        autoAlpha: 0,
+        stagger: 0.15,
+        duration: 1,
+        ease: 'back.out(2)',
+        scrollTrigger: { trigger: '[data-ruler]', start: 'top 80%', once: true }
+      });
+    },
+    { scope: pageRef }
+  );
 
-  // Gallery category filter
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-
-  // Fullscreen Lightbox Modal state
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const [isFilmPlaying, setIsFilmPlaying] = useState(false);
-
-  const filteredPhotos = selectedCategory === 'All'
-    ? MYSA_VILLA_PHOTOS
-    : MYSA_VILLA_PHOTOS.filter(photo => photo.category === selectedCategory);
-
-  // Keyboard navigation for Lightbox
-  useEffect(() => {
-    if (lightboxIndex === null) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setLightboxIndex(null);
-      } else if (e.key === 'ArrowRight') {
-        setLightboxIndex(prev => (prev !== null ? (prev + 1) % MYSA_VILLA_PHOTOS.length : 0));
-      } else if (e.key === 'ArrowLeft') {
-        setLightboxIndex(prev => (prev !== null ? (prev - 1 + MYSA_VILLA_PHOTOS.length) % MYSA_VILLA_PHOTOS.length : 0));
+  // Floor plan draws itself whenever the floor changes
+  useGSAP(
+    () => {
+      if (prefersReducedMotion()) return;
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo('[data-plan-line]', { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.6, stagger: 0.07, ease: 'power2.inOut' }).from(
+        '[data-plan-label]',
+        { autoAlpha: 0, y: 6, stagger: 0.05, duration: 0.6 },
+        0.6
+      );
+      const st = ScrollTrigger.create({ trigger: planRef.current, start: 'top 75%', once: true, onEnter: () => tl.play() });
+      if (settled.current.floor && planCopyRef.current) {
+        gsap.from(planCopyRef.current.children, { y: 24, autoAlpha: 0, stagger: 0.06, duration: 0.9, ease: 'expo.out' });
       }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [lightboxIndex]);
+      settled.current.floor = true;
+      return () => st.kill();
+    },
+    { scope: planRef, dependencies: [floor], revertOnUpdate: true }
+  );
 
-  const toggleFaq = (index: number) => {
-    setOpenFaqIndex(openFaqIndex === index ? null : index);
-  };
+  // FAQ accordion
+  useGSAP(
+    () => {
+      gsap.utils.toArray<HTMLElement>('[data-faq-panel]').forEach((panel, i) => {
+        gsap.to(panel, { height: openFaq === i ? 'auto' : 0, duration: prefersReducedMotion() ? 0 : 0.7, ease: 'expo.inOut' });
+      });
+    },
+    { scope: pageRef, dependencies: [openFaq] }
+  );
 
-  const floorPlanData = {
-    ground: {
-      title: 'Ground Floor Plan',
-      area: '1,800 sq.ft.',
-      description: 'Grand entrance foyer leading to expansive double-height living room, guest bedroom suite, modern open kitchen with pantry, powder room, covered dual-car garage, and private outdoor swimming deck with landscaped plunge pool.',
-      image: '/images/mysa3d/ground-floor-bedroom.jpg',
-      highlights: ['Double-Height Living & Dining', 'Private Lap Pool & Deck', 'Chef Kitchen with Prep Island', 'Guest Suite with Garden View']
+  // Archive items rise in, and re-flow whenever the filter changes
+  useGSAP(
+    () => {
+      if (prefersReducedMotion()) return;
+      gsap.utils.toArray<HTMLElement>('[data-archive-item]').forEach((el) => {
+        gsap.from(el, { y: 60, autoAlpha: 0, duration: 1.2, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 94%', once: true } });
+      });
     },
-    first: {
-      title: 'First Floor Plan',
-      area: '2,400 sq.ft.',
-      description: 'Master sanctuary suite with Scandinavian timber paneling, private sunrise balcony, walk-in dressing lounge, spa bathroom with freestanding soaking tub, plus two secondary ensuite bedrooms and family lounge.',
-      image: '/images/mysa3d/first-floor-bedroom.jpg',
-      highlights: ['Master Suite with Walk-In Closet', 'Private Sun Deck Balconies', 'Central Family Lounge', 'Luxury Ensuite Bathrooms']
-    },
-    second: {
-      title: 'Second Floor Plan (Penthouse & Terrace)',
-      area: '1,600 sq.ft.',
-      description: 'Entertainment lounge / home theater studio, fitness wellness studio, barbecue terrace overlooking coastal treetops, covered pergola seating, and utility laundry area.',
-      image: '/images/mysa3d/LOUNGE.jpg',
-      highlights: ['Rooftop Stargazing Terrace', 'Private Gymnasium / Studio', 'Pergola Covered Seating', 'Solar & DG Integration Zone']
-    }
-  };
+    { scope: archiveRef, dependencies: [filter], revertOnUpdate: true }
+  );
 
-  const specCategories = {
-    painting: {
-      title: 'Painting & Finishes',
-      items: [
-        { label: 'External Walls', value: 'Weather-resistant acrylic exterior emulsion with textured protective coating' },
-        { label: 'Internal Walls', value: 'Smooth Asian Paints Royal Luxury plastic emulsion over dual skim coats of putty' },
-        { label: 'Ceilings', value: 'Premium acrylic emulsion paint in pure matte architectural white' },
-        { label: 'Driveway & Car Park', value: 'Heavy-duty exterior pavers with non-slip polyurethane sealant coating' }
-      ]
+  // Specification rows crossfade on tab change
+  useGSAP(
+    () => {
+      if (prefersReducedMotion() || !settled.current.spec) {
+        settled.current.spec = true;
+        return;
+      }
+      gsap.from('[data-spec-row]', { y: 24, autoAlpha: 0, stagger: 0.06, duration: 0.9, ease: 'expo.out' });
     },
-    plumbing: {
-      title: 'Plumbing & Sanitary',
-      items: [
-        { label: 'Sanitary Ware', value: 'Wall-hung rimless ceramic water closets with soft-close seat covers (Kohler / Grohe)' },
-        { label: 'CP Fittings', value: 'Premium concealed thermostatic diverters with multi-flow rain showerheads' },
-        { label: 'Hot Water Supply', value: 'Centralized heat-pump solar water heating with instant recirculation' },
-        { label: 'Piping', value: 'CPVC & UPVC lead-free piping with dedicated hydro-pneumatic pressure boosting' }
-      ]
-    },
-    electrical: {
-      title: 'Electrical & Automation',
-      items: [
-        { label: 'Wiring & Cables', value: 'Concealed copper wiring with FRLS (Flame Retardant Low Smoke) insulation' },
-        { label: 'Switches & Plates', value: 'Legrand Arteor / Schneider modular switches with brushed metallic plates' },
-        { label: 'Power Backup', value: '100% DG power backup with automatic changeover switch (AMF)' },
-        { label: 'Smart Home', value: 'App-controlled lighting automation, video door phone, and motorized curtain provision' }
-      ]
-    },
-    flooring: {
-      title: 'Flooring & Wall Tiling',
-      items: [
-        { label: 'Living & Dining', value: 'Imported Italian composite marble slabs with mirror polish finish' },
-        { label: 'Master Bedroom', value: 'High-density engineered Scandinavian natural oak wooden flooring' },
-        { label: 'Bathrooms', value: 'Full-body vitrified anti-skid floor tiles with full-height designer wall dado' },
-        { label: 'Pool Deck & Balcony', value: 'Exterior weatherproof composite wood decking and flamed granite accents' }
-      ]
-    },
-    joinery: {
-      title: 'Joinery & Glass Windows',
-      items: [
-        { label: 'Main Entrance Door', value: '8-foot high Burma Teak wood frame and shutter with Yale biometric digital lock' },
-        { label: 'Internal Doors', value: 'Solid core flush doors finished with natural timber veneer and Hafele hardware' },
-        { label: 'Windows & Sliders', value: 'Schüco / Saint-Gobain heavy-gauge acoustic aluminum sliding doors with toughened DGU glass' },
-        { label: 'Balcony Railings', value: 'Laminated toughened structural glass railings with minimalist SS 316 handrails' }
-      ]
-    },
-    ventilation: {
-      title: 'Ventilation & Air Conditioning',
-      items: [
-        { label: 'HVAC Provisions', value: 'Concealed copper piping & drainage designed for Daikin / Mitsubishi VRV multi-split systems' },
-        { label: 'Cross-Ventilation', value: 'Optimal Scandinavian passive airflow orientation capturing cool Bay of Bengal evening breezes' },
-        { label: 'Kitchen & Bath Exhaust', value: 'Low-noise inline acoustic centrifugal exhaust ducts in all wet zones' },
-        { label: 'Skylight Wells', value: 'Thermal-insulated double-glazed skylight wells over internal courtyard atriums' }
-      ]
-    }
-  };
+    { scope: specRef, dependencies: [spec] }
+  );
 
-  const faqItems = [
-    {
-      question: 'What is the total area of the MYSA Luxe Villas?',
-      answer: 'Each MYSA Luxe Villa features a generous built-up area ranging from 4,450 to 5,800 square feet spread across three expansive levels, set on an individual land parcel of 2,800 to 3,600 square feet with a private pool and private parking for 2–3 luxury vehicles.'
-    },
-    {
-      question: 'Are the villas part of a gated community?',
-      answer: 'Yes. MYSA is an exclusive, highly secure private gated enclave of only 6 bespoke residences in Vettuvankeni, ECR. The community features 24/7 security personnel, biometric gate access, CCTV perimeter coverage, and dedicated maintenance staff.'
-    },
-    {
-      question: 'What smart home features are included?',
-      answer: 'Every villa is equipped with integrated home automation including smart app-controlled mood lighting, biometric front door access with digital passcode and mechanical override, integrated video door phone, smart climate control provisions, and sensor-activated security alerts.'
-    },
-    {
-      question: 'Is there a power backup facility?',
-      answer: 'Yes, 100% complete diesel generator (DG) power backup is provided for every villa, including all air-conditioning units, home elevators, pool pumps, and general lighting with seamless automatic changeover switches.'
-    },
-    {
-      question: 'What are the customization options available?',
-      answer: 'Homeowners who secure a villa during construction can select customized interior flooring materials, customized kitchen cabinetry designs, optional private hydraulic glass elevators, and bespoke landscape configurations for the poolside garden.'
-    }
-  ];
+  useScrollFx(pageRef);
 
   return (
-    <div className="pt-0 pb-12 bg-[#faf8f5] text-[#1a1918] relative font-sans">
-      {/* Floating Sticky Brochure Button on the Right */}
-      <div className="fixed right-0 top-1/2 -translate-y-1/2 z-40">
-        <button
-          onClick={onOpenBrochure}
-          className="bg-[#1a1918] hover:bg-[#2b2723] text-white hover:text-[#c59b67] px-3.5 py-4 rounded-l-sm shadow-2xl flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest [writing-mode:vertical-rl] rotate-180 cursor-pointer transition-all border-l border-y border-[#c59b67]/40"
-        >
-          <FileText className="w-3.5 h-3.5 rotate-90 text-[#c59b67]" />
-          <span>Brochure →</span>
-        </button>
-      </div>
-
-      {/* 0. 4K Interactive Render Banner Carousel (Full Viewport Width & Height directly under Fixed Header) */}
-      <ThreeHeroVilla
-        theme="light"
-        onOpenVirtualTour={onOpenVirtualTour}
-        onExploreProjects={onOpenContact}
+    <div ref={pageRef} className="bg-paper text-ink">
+      {/* Scroll-world walkthrough — the scroll drives the camera */}
+      <ScrollWorld
+        chapters={WORLD_CHAPTERS}
+        src="/videos/mysa-world.mp4"
+        srcPortrait="/videos/mysa-world-m.mp4"
+        poster="/images/web/world-poster.webp"
+        posterPortrait="/images/web/world-poster-m.webp"
+        onPlayFilm={onOpenFilm}
+        onOpenContact={onOpenContact}
       />
 
-      {/* Top Breadcrumb & VIP Access Status Bar */}
-      <div className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12 mt-6 mb-10 flex flex-wrap items-center justify-between gap-4">
+      {/* Access bar */}
+      <div className="shell flex flex-wrap items-center justify-between gap-4 border-b border-line py-4 text-[13px]">
         {onNavigateProjects && (
-          <button
-            onClick={onNavigateProjects}
-            className="inline-flex items-center gap-2 text-xs font-mono text-[#68625d] hover:text-[#1a1918] uppercase tracking-wider transition-colors cursor-pointer"
-          >
-            <ArrowLeft className="w-3.5 h-3.5 text-[#c59b67]" />
-            <span>Back to All Projects</span>
+          <button type="button" onClick={onNavigateProjects} className="group flex cursor-pointer items-center gap-2 text-graphite hover:text-ink">
+            <ArrowLeft className="h-4 w-4 transition-transform duration-500 group-hover:-translate-x-1" />
+            All residences
           </button>
         )}
-        <div className="flex items-center gap-2.5 ml-auto">
-          <div className="inline-flex items-center gap-2 text-[#9c723b] text-[10px] font-mono uppercase tracking-[0.22em] font-semibold">
-            <span>VIP CLIENT SHOWCASE UNLOCKED</span>
-          </div>
-
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+          <span className="flex items-center gap-2 text-bronze-ink">
+            <span className="h-1.5 w-1.5 rounded-full bg-bronze" /> Private showcase unlocked
+          </span>
           {onLockVilla && (
-            <button
-              onClick={onLockVilla}
-              className="px-2.5 py-1 rounded-sm border border-[#d8cebe] hover:border-[#1a1918] text-[#68625d] hover:text-[#1a1918] text-[10px] font-mono uppercase tracking-wider transition-colors cursor-pointer"
-              title="Lock villa to test the gate form again"
-            >
-              Lock & Re-test Gate
+            <button type="button" onClick={onLockVilla} className="u-draw cursor-pointer text-graphite hover:text-ink" title="Lock the showcase to test the gate form again">
+              Lock & re-test gate
             </button>
           )}
-
           {onNavigateAdmin && (
-            <button
-              onClick={onNavigateAdmin}
-              className="px-2.5 py-1 rounded-sm border border-[#c59b67]/40 bg-[#c59b67]/10 hover:bg-[#c59b67]/20 text-[#c59b67] text-[10px] font-mono uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1.5"
-            >
-              <span>View Leads in /admin</span>
-              <span className="text-[11px]">→</span>
+            <button type="button" onClick={onNavigateAdmin} className="u-draw cursor-pointer text-graphite hover:text-ink">
+              View leads in /admin
             </button>
           )}
         </div>
       </div>
 
-      {/* 1. Header */}
-      <section className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12 mb-10">
-        <div className="text-center max-w-4xl mx-auto">
-          <div className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] text-[#9c723b] mb-3">
-            <span>VETTUVANKENI · EAST COAST ROAD · CHENNAI</span>
-          </div>
-
-          <h1 className="font-serif-luxury text-3xl sm:text-5xl lg:text-6xl font-normal text-[#1a1918] tracking-tight mb-6 leading-[1.1]">
-            MYSA Luxe Villas — A Deep Dive into <span className="italic font-serif-luxury text-[#c59b67]">Unparalleled Luxury</span>
-          </h1>
-
-          <p className="text-xs sm:text-sm text-[#68625d] font-light leading-relaxed max-w-3xl mx-auto mb-8">
-            Discover 6 contemporary 4BHK Swedish-style villas in Vettuvankeni, Chennai, designed for a serene and inspired lifestyle. 'Mysa', a Swedish concept of cozy contentment, is at the heart of these homes, blending luxury with nature.
-          </p>
-
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <button
-              onClick={onOpenContact}
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-sm bg-[#1a1918] hover:bg-[#2b2723] text-white text-xs font-semibold uppercase tracking-wider transition-colors shadow-md cursor-pointer font-mono"
-            >
-              <span>Schedule Private Viewing</span>
-              <ArrowRight className="w-3.5 h-3.5 text-[#c59b67]" />
-            </button>
-            <button
-              onClick={onOpenVirtualTour}
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-sm border border-[#d8cebe] text-[#1a1918] text-xs font-mono uppercase tracking-wider hover:border-[#1a1918] transition-colors shadow-xs cursor-pointer"
-            >
-              <Eye className="w-4 h-4 text-[#c59b67]" />
-              <span>Launch 3D Walkthrough</span>
-            </button>
-          </div>
-
-          {/* Key facts strip */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-[#e8e1d6] border border-[#e8e1d6] rounded-sm overflow-hidden shadow-sm">
-            {[
-              { value: '06', label: 'Exclusive Villas' },
-              { value: '4,450–5,800', label: 'Sq.Ft. Built-Up' },
-              { value: '4 BHK', label: 'Swedish Design' },
-              { value: '100%', label: 'Private Pool & DG Backup' }
-            ].map((stat) => (
-              <div key={stat.label} className="bg-white px-3 py-4 text-center">
-                <div className="font-serif-luxury text-lg sm:text-xl font-bold text-[#1a1918]">{stat.value}</div>
-                <div className="text-[9px] font-mono uppercase tracking-wider text-[#8c827a] mt-0.5">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-
-
-      {/* 3. Comprehensive MYSA Visual Architecture Gallery (All 11 Pictures) */}
-      <section className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12 mb-14">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
-          <div className="text-left max-w-2xl">
-            <div className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] text-[#c59b67] mb-2 flex items-center gap-2">
-              <Camera className="w-3.5 h-3.5 text-[#c59b67]" />
-              <span>THE ARCHITECTURAL VISUAL COLLECTION</span>
+      {/* Facts */}
+      <section className="shell">
+        <dl className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5" data-stagger>
+          {FACTS.map((f, i) => (
+            <div key={f.label} className={`border-b border-line py-8 lg:border-b-0 ${i > 0 ? 'lg:border-l lg:pl-8' : ''}`}>
+              <dt className="font-display text-[clamp(2.2rem,3.4vw,3.4rem)] leading-none tabular-nums">{f.value}</dt>
+              <dd className="mt-3 text-[13px] text-graphite">{f.label}</dd>
             </div>
-            <h2 className="font-serif-luxury text-3xl sm:text-4xl font-normal text-[#1a1918] tracking-tight mb-2">
-              MYSA Villas <span className="italic font-serif-luxury text-[#c59b67]">Photo Showcase</span>
-            </h2>
-            <p className="text-xs sm:text-sm text-[#68625d] font-light">
-              Explore all 11 authentic photographs capturing the Scandinavian butterfly roof, cantilevered dark granite balcony, double-height great room, minimalist culinary studio, and master sanctuaries.
-            </p>
-          </div>
+          ))}
+        </dl>
+      </section>
 
-          <div className="flex items-center gap-2 text-xs font-mono text-[#68625d]">
-            <span className="px-2.5 py-1 rounded-xs bg-white border border-[#eae4db] text-[#c59b67] font-semibold">
-              {filteredPhotos.length} / {MYSA_VILLA_PHOTOS.length} Photographs
-            </span>
-            <button
-              onClick={() => setLightboxIndex(0)}
-              className="px-3.5 py-1 rounded-xs bg-[#1a1918] text-white font-medium hover:bg-[#2b2723] transition-colors cursor-pointer uppercase tracking-wider"
-            >
-              Slideshow View
+      {/* Concept */}
+      <section className="shell grid gap-10 border-t border-line py-28 sm:py-36 lg:grid-cols-12">
+        <p className="meta text-graphite lg:col-span-3" data-reveal>
+          The concept — Mysa
+        </p>
+        <div className="lg:col-span-9">
+          <p className="font-display text-statement" data-split>
+            ‘Mysa’ — the Swedish art of cozy contentment — sits at the heart of six contemporary villas designed for a serene and{' '}
+            <span className="serif-italic text-bronze">inspired life.</span>
+          </p>
+          <div className="mt-12 flex flex-wrap gap-3" data-reveal>
+            <button type="button" onClick={onOpenContact} className="btn btn-ink">
+              Schedule a private viewing
+              <ArrowUpRight className="h-4 w-4" />
             </button>
           </div>
         </div>
+      </section>
 
-        {/* Filter Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-3 mb-8 no-scrollbar border-b border-[#eae4db] text-xs font-mono">
-          {[
-            { id: 'All', label: `All Pictures (${MYSA_VILLA_PHOTOS.length})` },
-            { id: 'Facade', label: 'Facade & Architecture' },
-            { id: 'Living', label: 'Living & Great Room' },
-            { id: 'Master Suite', label: 'Suites & Sanctuaries' },
-            { id: 'Kitchen & Dining', label: 'Culinary Studio' }
-          ].map((cat) => {
-            const isSelected = selectedCategory === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3.5 py-2 rounded-sm uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer ${
-                  isSelected
-                    ? 'bg-[#1a1918] text-white font-medium shadow-sm'
-                    : 'bg-white text-[#68625d] hover:text-[#1a1918] border border-[#eae4db]'
-                }`}
-              >
-                {cat.label}
-              </button>
-            );
-          })}
-        </div>
+      {/* Archive */}
+      <section className="bg-mist py-24 sm:py-32">
+        <div className="shell">
+          <div className="mb-12 flex flex-wrap items-end justify-between gap-8">
+            <div>
+              <p className="meta mb-5 text-graphite">The visual archive</p>
+              <h2 className="font-display text-headline">
+                Eleven <span className="serif-italic">photographs.</span>
+              </h2>
+            </div>
+            <div className="no-scrollbar -mx-1 flex max-w-full gap-2 overflow-x-auto px-1">
+              {FILTERS.map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => setFilter(f.id)}
+                  aria-pressed={filter === f.id}
+                  className={`h-10 shrink-0 cursor-pointer rounded-full px-5 text-[13px] transition-colors duration-500 ${
+                    filter === f.id ? 'bg-ink text-paper' : 'bg-paper text-graphite hover:text-ink'
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
-        {/* Bento Grid of Villa Pictures */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredPhotos.map((photo, idx) => {
-            const globalIdx = MYSA_VILLA_PHOTOS.findIndex(p => p.id === photo.id);
-            const isFeature = idx === 0;
-            return (
-              <div
-                key={photo.id}
-                className={`bg-white rounded-[20px] overflow-hidden border border-[#eae4db] hover:border-[#c59b67] transition-all flex flex-col shadow-sm hover:shadow-xl group cursor-pointer ${isFeature ? 'sm:col-span-2' : ''}`}
-                onClick={() => setLightboxIndex(globalIdx !== -1 ? globalIdx : 0)}
-              >
-                <div className={`relative overflow-hidden bg-[#eae5dc] ${isFeature ? 'h-72 lg:h-96' : 'h-64'}`}>
-                  <img
-                    src={photo.imageUrl}
-                    alt={photo.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" />
-
-                  {/* Top tags */}
-                  <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-                    <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-xs bg-white/90 backdrop-blur-md border border-white/40 text-[#1a1918] font-medium">
-                      {photo.categoryLabel}
-                    </span>
-                    <span className="text-[9px] font-mono px-2 py-0.5 rounded-xs bg-white/90 backdrop-blur-md border border-white/40 text-[#68625d]">
-                      {photo.area}
-                    </span>
-                  </div>
-
-                  {/* Hover prompt */}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xs bg-[#1a1918] text-white text-xs font-mono uppercase tracking-wider font-medium shadow-2xl scale-95 group-hover:scale-100 transition-transform">
-                      <Maximize2 className="w-3.5 h-3.5 text-[#c59b67]" />
-                      <span>View Full Resolution</span>
-                    </span>
-                  </div>
-                </div>
-
-                <div className="p-5 flex-1 flex flex-col justify-between text-left">
-                  <div>
-                    <h4 className="font-serif-luxury text-base sm:text-lg font-bold text-[#1a1918] group-hover:text-[#c59b67] transition-colors mb-1.5">
-                      {photo.title}
-                    </h4>
-                    <p className="text-xs text-[#68625d] font-light leading-relaxed line-clamp-2">
-                      {photo.description}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-3 mt-3 border-t border-[#f0ece4] text-[10px] font-mono text-[#8c827a]">
-                    <span className="flex items-center gap-1 text-[#68625d]">
-                      <MapPin className="w-3 h-3 text-[#c59b67]" />
-                      <span>{photo.location}</span>
-                    </span>
-                    <span className="text-[#c59b67] group-hover:translate-x-1 transition-transform inline-flex items-center gap-1 font-medium">
-                      <span>Click to expand</span>
-                      <span>→</span>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          <div ref={archiveRef} className="columns-1 gap-6 sm:columns-2 lg:columns-3">
+            {photos.map((photo) => {
+              const globalIndex = MYSA_VILLA_PHOTOS.findIndex((p) => p.id === photo.id);
+              return (
+                <button
+                  key={photo.id}
+                  type="button"
+                  onClick={() => setViewer(globalIndex)}
+                  data-cursor="View"
+                  data-archive-item
+                  className="group mb-6 block w-full cursor-pointer break-inside-avoid text-left"
+                >
+                  <span className="relative block overflow-hidden bg-stone" style={{ aspectRatio: `${photo.media.w} / ${photo.media.h}` }}>
+                    <Img media={photo.media} alt={photo.title} sizes="(min-width: 1024px) 32vw, (min-width: 640px) 48vw, 100vw" className="img-cover transition-transform duration-[1.4s] ease-luxe group-hover:scale-[1.05]" />
+                  </span>
+                  <span className="mt-3 flex items-baseline justify-between gap-4">
+                    <span className="text-[14px] font-medium leading-snug">{photo.title}</span>
+                    <span className="shrink-0 text-[12px] text-ash">{photo.categoryLabel}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </section>
 
-      {/* 4. Villa Floor Plans */}
-      <section className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12 mb-14">
-        <div className="text-center max-w-2xl mx-auto mb-10">
-          <div className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] text-[#c59b67] mb-2">
-            LAYOUT BLUEPRINTS
+      {/* Floor plans */}
+      <section className="shell py-28 sm:py-36">
+        <div className="mb-12 flex flex-wrap items-end justify-between gap-8">
+          <div>
+            <p className="meta mb-5 text-graphite" data-reveal>
+              Layout blueprints
+            </p>
+            <h2 className="font-display text-headline" data-split>
+              Three levels, <span className="serif-italic">one flow.</span>
+            </h2>
           </div>
-          <h2 className="font-serif-luxury text-3xl sm:text-4xl font-normal text-[#1a1918] tracking-tight mb-3">
-            Villa <span className="italic font-serif-luxury text-[#c59b67]">Floor Plans</span>
-          </h2>
-          <p className="text-xs sm:text-sm text-[#68625d]">
-            Explore the thoughtfully designed layouts of MYSA Luxe Villas, crafted for comfort and elegance.
-          </p>
-        </div>
-
-        {/* Floor Plan Switcher Tabs */}
-        <div className="flex justify-center mb-8">
-          <div className="inline-flex p-1 bg-white rounded-sm border border-[#e6dfd3] shadow-xs">
-            {(['ground', 'first', 'second'] as const).map((key) => (
+          <div className="flex gap-1 rounded-full border border-line-strong p-1" role="tablist" aria-label="Choose a floor">
+            {(Object.keys(FLOORS) as FloorKey[]).map((key) => (
               <button
                 key={key}
-                onClick={() => setActiveFloorPlan(key)}
-                className={`px-4 sm:px-6 py-2 rounded-xs text-[11px] font-mono uppercase tracking-wider transition-all cursor-pointer ${
-                  activeFloorPlan === key
-                    ? 'bg-[#161513] text-white font-medium shadow-xs'
-                    : 'text-[#5b544d] hover:text-[#161513]'
-                }`}
+                type="button"
+                role="tab"
+                aria-selected={floor === key}
+                onClick={() => setFloor(key)}
+                className={`h-10 cursor-pointer rounded-full px-5 text-[13px] transition-colors duration-500 ${floor === key ? 'bg-ink text-paper' : 'text-graphite hover:text-ink'}`}
               >
-                {key === 'ground' ? 'Ground Floor' : key === 'first' ? 'First Floor' : 'Second Floor'}
+                {FLOORS[key].tab}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Floor Plan Card */}
-        <div className="bg-white rounded-[24px] p-8 sm:p-12 border border-[#eae4db] shadow-sm grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-          <div className="space-y-5 text-left">
-            <div className="flex items-center gap-3">
-              <span className="px-3 py-1 rounded-sm bg-[#c59b67]/10 text-[#c59b67] border border-[#c59b67]/30 text-xs font-mono font-semibold">
-                Total Area: {floorPlanData[activeFloorPlan].area}
-              </span>
-              <span className="text-xs font-mono text-emerald-700 font-medium">100% Vastu Compliant</span>
-            </div>
-
-            <h3 className="font-serif-luxury text-2xl sm:text-3xl font-bold text-[#1a1918]">
-              {floorPlanData[activeFloorPlan].title}
-            </h3>
-
-            <p className="text-xs sm:text-sm text-[#68625d] leading-relaxed font-light">
-              {floorPlanData[activeFloorPlan].description}
+        <div className="grid gap-12 lg:grid-cols-12 lg:gap-8">
+          <div ref={planRef} className="border border-line bg-mist p-4 sm:p-8 lg:col-span-7">
+            <svg viewBox="0 0 400 300" className="h-auto w-full" role="img" aria-label={`${plan.title} schematic`}>
+              {plan.rooms.map((room) => (
+                <g key={`${floor}-${room.label}`}>
+                  <rect
+                    data-plan-line
+                    x={room.x}
+                    y={room.y}
+                    width={room.w}
+                    height={room.h}
+                    pathLength={1}
+                    strokeDasharray="1"
+                    fill="none"
+                    stroke="#0f0f0e"
+                    strokeWidth={0.9}
+                  />
+                  <text
+                    data-plan-label
+                    x={room.x + room.w / 2}
+                    y={room.y + room.h / 2}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="fill-graphite"
+                    style={{ fontSize: 9, fontFamily: 'Geist, sans-serif', letterSpacing: '0.04em' }}
+                  >
+                    {room.label}
+                  </text>
+                </g>
+              ))}
+              <g data-plan-label transform="translate(372 278)">
+                <circle r="9" fill="none" stroke="#a9814a" strokeWidth="0.8" />
+                <text textAnchor="middle" dominantBaseline="middle" style={{ fontSize: 8, fontFamily: 'Geist, sans-serif' }} className="fill-bronze">
+                  N
+                </text>
+              </g>
+            </svg>
+            <p className="mt-4 flex justify-between text-[12px] text-ash">
+              <span>Schematic — not to scale</span>
+              <span>100% Vastu compliant</span>
             </p>
+          </div>
 
-            <div className="pt-2">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[#8c827a] font-medium block mb-2">
-                KEY ARCHITECTURAL HIGHLIGHTS:
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {floorPlanData[activeFloorPlan].highlights.map((h, i) => (
-                  <div key={i} className="flex items-center gap-2 text-xs text-[#1a1918] bg-[#fbf9f6] p-2.5 rounded-sm border border-[#eae4db]">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#c59b67] shrink-0" />
-                    <span>{h}</span>
-                  </div>
+          <div className="flex flex-col justify-between gap-10 lg:col-span-4 lg:col-start-9">
+            <div ref={planCopyRef}>
+              <p className="text-[13px] text-graphite">Built-up {plan.area}</p>
+              <h3 className="mt-3 font-display text-[2.6rem] leading-[1]">{plan.title}</h3>
+              <p className="mt-5 text-[15px] leading-relaxed text-graphite">{plan.description}</p>
+              <ul className="mt-8 border-t border-line">
+                {plan.highlights.map((h) => (
+                  <li key={h} className="border-b border-line py-3 text-[14px]">
+                    {h}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <button type="button" onClick={onOpenContact} className="btn btn-line self-start">
+              Request CAD blueprints & brochure
+              <ArrowUpRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Amenities */}
+      <section className="shell pb-28 sm:pb-36">
+        <h2 className="mb-14 font-display text-headline" data-split>
+          Comforts, <span className="serif-italic">quietly considered.</span>
+        </h2>
+        <div className="grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+          {AMENITIES.map((a) => (
+            <div key={a.title} className="group bg-paper p-8 transition-colors duration-700 hover:bg-mist sm:p-10" data-reveal>
+              <a.icon className="h-7 w-7 text-bronze transition-transform duration-700 ease-luxe group-hover:-translate-y-1" strokeWidth={1.2} />
+              <h3 className="mt-10 font-display text-[1.9rem] leading-none">{a.title}</h3>
+              <p className="mt-4 text-[14px] leading-relaxed text-graphite">{a.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Specifications */}
+      <section className="bg-stone py-28 sm:py-36">
+        <div className="shell grid gap-12 lg:grid-cols-12 lg:gap-8">
+          <div className="lg:col-span-4">
+            <div className="lg:sticky lg:top-32">
+              <p className="meta mb-5 text-graphite">Technical specifications</p>
+              <h2 className="font-display text-headline">Tier-one, throughout.</h2>
+              <div className="no-scrollbar mt-10 flex gap-2 overflow-x-auto lg:flex-col lg:gap-0 lg:overflow-visible lg:border-t lg:border-line-strong">
+                {SPECS.map((s, i) => (
+                  <button
+                    key={s.key}
+                    type="button"
+                    onClick={() => setSpec(s.key)}
+                    aria-pressed={spec === s.key}
+                    className={`flex shrink-0 cursor-pointer items-center justify-between gap-6 rounded-full px-5 py-2.5 text-left text-[14px] transition-colors duration-500 lg:rounded-none lg:border-b lg:border-line-strong lg:px-0 lg:py-4 ${
+                      spec === s.key ? 'bg-ink text-paper lg:bg-transparent lg:text-ink' : 'bg-paper/60 text-graphite hover:text-ink lg:bg-transparent'
+                    }`}
+                  >
+                    <span className="flex items-center gap-4">
+                      <span className="hidden tabular-nums text-ash lg:inline">{String(i + 1).padStart(2, '0')}</span>
+                      {s.label}
+                    </span>
+                    <ArrowRight className={`hidden h-4 w-4 transition-all duration-500 lg:block ${spec === s.key ? 'translate-x-0 opacity-100' : '-translate-x-2 opacity-0'}`} />
+                  </button>
                 ))}
               </div>
             </div>
-
-            <div className="pt-4 flex items-center gap-4">
-              <button
-                onClick={onOpenBrochure}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-[#1a1918] hover:bg-[#2b2723] text-white text-xs font-mono uppercase tracking-wider font-semibold transition-colors cursor-pointer shadow-sm"
-              >
-                <Download className="w-3.5 h-3.5 text-[#c59b67]" />
-                <span>Download CAD Blueprint PDF</span>
-              </button>
-            </div>
           </div>
-
-          <div className="rounded-[16px] overflow-hidden border border-[#eae4db] bg-[#fbf9f6] p-4 relative flex items-center justify-center min-h-[320px]">
-            {/* Architectural Blueprint Vector Render */}
-            <div className="w-full aspect-[4/3] bg-gradient-to-br from-[#f8f5f0] to-[#f0eae1] rounded-[12px] p-6 text-[#1a1918] font-mono text-[11px] relative overflow-hidden flex flex-col justify-between border border-[#eae4db] shadow-sm">
-              <div className="flex items-center justify-between border-b border-[#eae4db] pb-3">
-                <span className="text-[#c59b67] tracking-widest uppercase font-bold text-[10px]">
-                  UNIFRA ARCHITECTURAL BLUEPRINT
-                </span>
-                <span className="text-[#8c827a] text-[10px]">SCALE 1:50 MM</span>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3 my-4">
-                <div className="border border-[#eae4db] rounded-sm p-2.5 bg-white shadow-xs">
-                  <div className="text-[9px] text-[#c59b67] uppercase font-semibold">Level</div>
-                  <div className="font-bold text-xs text-[#1a1918]">{floorPlanData[activeFloorPlan].title}</div>
-                </div>
-                <div className="border border-[#eae4db] rounded-sm p-2.5 bg-white shadow-xs">
-                  <div className="text-[9px] text-[#c59b67] uppercase font-semibold">Built-Up</div>
-                  <div className="font-bold text-xs text-[#1a1918]">{floorPlanData[activeFloorPlan].area}</div>
-                </div>
-                <div className="border border-[#eae4db] rounded-sm p-2.5 bg-white shadow-xs">
-                  <div className="text-[9px] text-[#c59b67] uppercase font-semibold">Status</div>
-                  <div className="font-bold text-xs text-emerald-700">Approved</div>
-                </div>
-              </div>
-
-              {/* Graphical schematic lines */}
-              <div className="relative border border-dashed border-[#d8cebe] rounded-sm h-32 flex items-center justify-center p-2 text-center text-[#8c827a] text-[10px]">
-                <div className="absolute inset-x-4 top-2 h-0.5 bg-[#c59b67]/20" />
-                <div className="absolute inset-y-4 left-1/3 w-0.5 bg-[#c59b67]/20" />
-                <div className="absolute inset-y-4 right-1/3 w-0.5 bg-[#c59b67]/20" />
-                <div className="space-y-1">
-                  <Compass className="w-6 h-6 mx-auto text-[#c59b67] mb-1 opacity-80" />
-                  <span className="text-[#1a1918] font-sans font-medium block">
-                    {floorPlanData[activeFloorPlan].title} Schematic Layout
-                  </span>
-                  <span className="text-[#8c827a]">Click "Download CAD Blueprint PDF" for detailed dimensional drawings</span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-[9px] text-[#8c827a] pt-2 border-t border-[#eae4db]">
-                <span className="font-mono">PROJECT: MYSA LUXE VILLAS</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const targetId = activeFloorPlan === 'ground' ? 'grand-living' : activeFloorPlan === 'first' ? 'master-sanctuary' : 'mezzanine-lounge';
-                    const idx = MYSA_VILLA_PHOTOS.findIndex(p => p.id === targetId);
-                    setLightboxIndex(idx !== -1 ? idx : 0);
-                  }}
-                  className="inline-flex items-center gap-1.5 text-[#c59b67] hover:text-[#1a1918] cursor-pointer font-mono font-semibold"
-                >
-                  <Camera className="w-3 h-3" />
-                  <span>View Actual Photograph →</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. World-Class Amenities */}
-      <section className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12 mb-14">
-        <div className="text-center max-w-2xl mx-auto mb-10">
-          <div className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] text-[#c59b67] mb-2">
-            LUXURY COMFORTS
-          </div>
-          <h2 className="font-serif-luxury text-3xl sm:text-4xl font-normal text-[#1a1918] tracking-tight mb-3">
-            World-Class <span className="italic font-serif-luxury text-[#c59b67]">Amenities</span>
-          </h2>
-          <p className="text-xs sm:text-sm text-[#68625d]">
-            Experience a lifestyle of convenience and luxury with amenities designed to elevate every moment.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="bg-white rounded-[20px] p-6 border border-[#eae4db] hover:border-[#c59b67] transition-all flex items-start gap-4 shadow-sm hover:shadow-md">
-            <div className="w-12 h-12 rounded-sm bg-[#c59b67]/10 border border-[#c59b67]/30 flex items-center justify-center text-[#c59b67] shrink-0">
-              <Droplets className="w-6 h-6" />
-            </div>
-            <div className="text-left">
-              <h4 className="font-serif-luxury text-base font-bold text-[#1a1918] mb-1">Private Pools</h4>
-              <p className="text-xs text-[#68625d] leading-relaxed font-light">
-                Dedicated temperature-balanced lap pools in each individual villa with perimeter timber sun deck.
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-[20px] p-6 border border-[#eae4db] hover:border-[#c59b67] transition-all flex items-start gap-4 shadow-sm hover:shadow-md">
-            <div className="w-12 h-12 rounded-sm bg-[#c59b67]/10 border border-[#c59b67]/30 flex items-center justify-center text-[#c59b67] shrink-0">
-              <Zap className="w-6 h-6" />
-            </div>
-            <div className="text-left">
-              <h4 className="font-serif-luxury text-base font-bold text-[#1a1918] mb-1">24/7 Power Backup</h4>
-              <p className="text-xs text-[#68625d] leading-relaxed font-light">
-                100% DG generator backup covering all central air-conditioners, elevators, and appliances automatically.
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-[20px] p-6 border border-[#eae4db] hover:border-[#c59b67] transition-all flex items-start gap-4 shadow-sm hover:shadow-md">
-            <div className="w-12 h-12 rounded-sm bg-[#c59b67]/10 border border-[#c59b67]/30 flex items-center justify-center text-[#c59b67] shrink-0">
-              <Sparkles className="w-6 h-6" />
-            </div>
-            <div className="text-left">
-              <h4 className="font-serif-luxury text-base font-bold text-[#1a1918] mb-1">Smart Home Automation</h4>
-              <p className="text-xs text-[#68625d] leading-relaxed font-light">
-                Integrated app-controlled mood lighting, digital smart door locks, and video door surveillance.
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-[20px] p-6 border border-[#eae4db] hover:border-[#c59b67] transition-all flex items-start gap-4 shadow-sm hover:shadow-md">
-            <div className="w-12 h-12 rounded-sm bg-[#c59b67]/10 border border-[#c59b67]/30 flex items-center justify-center text-[#c59b67] shrink-0">
-              <Layers className="w-6 h-6" />
-            </div>
-            <div className="text-left">
-              <h4 className="font-serif-luxury text-base font-bold text-[#1a1918] mb-1">Landscaped Gardens</h4>
-              <p className="text-xs text-[#68625d] leading-relaxed font-light">
-                Curated botanical courtyard gardens with native tropical flora and automatic drip irrigation.
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-[20px] p-6 border border-[#eae4db] hover:border-[#c59b67] transition-all flex items-start gap-4 shadow-sm hover:shadow-md">
-            <div className="w-12 h-12 rounded-sm bg-[#c59b67]/10 border border-[#c59b67]/30 flex items-center justify-center text-[#c59b67] shrink-0">
-              <Shield className="w-6 h-6" />
-            </div>
-            <div className="text-left">
-              <h4 className="font-serif-luxury text-base font-bold text-[#1a1918] mb-1">Biometric Security</h4>
-              <p className="text-xs text-[#68625d] leading-relaxed font-light">
-                Manned gated entry with computerized visitor verification, boom barriers, and HD infrared CCTV coverage.
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-[20px] p-6 border border-[#eae4db] hover:border-[#c59b67] transition-all flex items-start gap-4 shadow-sm hover:shadow-md">
-            <div className="w-12 h-12 rounded-sm bg-[#c59b67]/10 border border-[#c59b67]/30 flex items-center justify-center text-[#c59b67] shrink-0">
-              <BatteryCharging className="w-6 h-6" />
-            </div>
-            <div className="text-left">
-              <h4 className="font-serif-luxury text-base font-bold text-[#1a1918] mb-1">EV Charging Stations</h4>
-              <p className="text-xs text-[#68625d] leading-relaxed font-light">
-                High-speed dedicated fast-charging wallbox provisions in every covered private two-car portico.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. Detailed Specifications */}
-      <section className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12 mb-14">
-        <div className="text-center max-w-2xl mx-auto mb-10">
-          <div className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] text-[#c59b67] mb-2">
-            TECHNICAL SPECIFICATIONS
-          </div>
-          <h2 className="font-serif-luxury text-3xl sm:text-4xl font-normal text-[#1a1918] tracking-tight mb-3">
-            Detailed <span className="italic font-serif-luxury text-[#c59b67]">Specifications</span>
-          </h2>
-          <p className="text-xs sm:text-sm text-[#68625d]">
-            Engineered using only certified premium tier-1 materials and international building standards.
-          </p>
-        </div>
-
-        {/* Specification Tabs */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
-          {(
-            [
-              { key: 'painting', label: 'Painting' },
-              { key: 'plumbing', label: 'Plumbing & Sanitary' },
-              { key: 'electrical', label: 'Electrical' },
-              { key: 'flooring', label: 'Flooring' },
-              { key: 'joinery', label: 'Joinery & Doors' },
-              { key: 'ventilation', label: 'Ventilation' }
-            ] as const
-          ).map((cat) => (
-            <button
-              key={cat.key}
-              onClick={() => setActiveSpecCategory(cat.key)}
-              className={`px-4 sm:px-6 py-2 rounded-sm text-[11px] font-mono uppercase tracking-wider transition-all cursor-pointer ${
-                activeSpecCategory === cat.key
-                  ? 'bg-[#1a1918] text-white font-medium shadow-sm'
-                  : 'bg-white text-[#68625d] hover:text-[#1a1918] border border-[#eae4db]'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Active Specification List */}
-        <div className="bg-white rounded-[24px] p-8 sm:p-10 border border-[#eae4db] shadow-sm max-w-4xl mx-auto">
-          <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#eae4db]">
-            <h3 className="font-serif-luxury text-xl font-bold text-[#1a1918]">
-              {specCategories[activeSpecCategory].title}
+          <div ref={specRef} className="lg:col-span-7 lg:col-start-6">
+            <h3 data-spec-row className="font-display text-[2.4rem] leading-none">
+              {activeSpec.label}
             </h3>
-            <span className="text-[10px] font-mono text-[#c59b67] font-semibold uppercase tracking-wider">Tier-1 Certified</span>
+            <dl className="mt-10 border-t border-ink">
+              {activeSpec.items.map(([label, value]) => (
+                <div key={`${activeSpec.key}-${label}`} data-spec-row className="grid gap-2 border-b border-line-strong py-6 sm:grid-cols-12 sm:gap-6">
+                  <dt className="text-[14px] font-medium sm:col-span-4">{label}</dt>
+                  <dd className="text-[15px] leading-relaxed text-graphite sm:col-span-8">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      {/* Construction status */}
+      <section className="shell py-28 sm:py-36">
+        <div className="mb-16 flex flex-wrap items-end justify-between gap-6">
+          <h2 className="font-display text-headline" data-split>
+            From foundation <span className="serif-italic">to finish.</span>
+          </h2>
+          <p className="text-[15px] text-graphite" data-reveal>
+            Live construction status
+          </p>
+        </div>
+        <div data-progress className="relative">
+          {/* desktop track */}
+          <div className="absolute left-0 right-0 top-[7px] hidden h-px bg-line-strong md:block">
+            <div data-progress-fill className="h-px origin-left bg-ink" style={{ width: '71%' }} />
+          </div>
+          {/* mobile track */}
+          <div className="absolute bottom-0 left-[7px] top-0 w-px bg-line-strong md:hidden">
+            <div data-progress-fill className="w-px origin-top bg-ink" style={{ height: '62%' }} />
+          </div>
+          <ol className="relative grid gap-10 md:grid-cols-5 md:gap-6">
+            {STAGES.map((stage) => (
+              <li key={stage.title} className="flex gap-6 md:block">
+                <span
+                  className={`relative z-10 mt-0.5 block h-[15px] w-[15px] shrink-0 rounded-full border ${
+                    stage.state === 'done'
+                      ? 'border-ink bg-ink'
+                      : stage.state === 'active'
+                        ? 'border-bronze bg-paper ring-4 ring-bronze/20'
+                        : 'border-line-strong bg-paper'
+                  }`}
+                />
+                <span className="block md:mt-8">
+                  <span className={`block font-display text-[1.7rem] leading-[1.05] ${stage.state === 'next' ? 'text-ash' : ''}`}>{stage.title}</span>
+                  <span className={`mt-2 block text-[13px] ${stage.state === 'active' ? 'text-bronze-ink' : 'text-graphite'}`}>{stage.status}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* Location ruler */}
+      <section className="border-t border-line bg-mist py-28 sm:py-36">
+        <div className="shell">
+          <div className="grid gap-8 lg:grid-cols-12">
+            <h2 className="font-display text-headline lg:col-span-6" data-split>
+              Minutes from <span className="serif-italic">everything.</span>
+            </h2>
+            <p className="max-w-md text-[15px] leading-relaxed text-graphite lg:col-span-5 lg:col-start-8" data-reveal>
+              Situated in the serene locale of Vettuvankeni — peaceful coastal living with convenient urban access.
+            </p>
           </div>
 
-          <div className="space-y-3">
-            {specCategories[activeSpecCategory].items.map((item, idx) => (
+          <div data-ruler className="relative mt-20 hidden h-56 md:block">
+            <div className="absolute inset-x-0 top-1/2 h-px bg-ink" />
+            {[0, 5, 10, 15, 20].map((tick) => (
+              <span key={tick} className="absolute top-1/2 -translate-x-1/2 pt-4 text-[11px] tabular-nums text-ash" style={{ left: `${(tick / 20) * 100}%` }}>
+                {tick}′
+              </span>
+            ))}
+            {PLACES.map((p, i) => (
               <div
-                key={idx}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-sm bg-[#fbf9f6] border border-[#eae4db] gap-2"
+                key={p.place}
+                data-ruler-mark
+                className={`absolute w-56 -translate-x-1/2 text-center ${i % 2 === 0 ? 'bottom-1/2 pb-6' : 'top-1/2 pt-12'}`}
+                style={{ left: `${(p.min / 20) * 100}%` }}
               >
-                <div className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-[#c59b67] shrink-0" />
-                  <span className="text-xs sm:text-sm font-semibold text-[#1a1918]">{item.label}</span>
-                </div>
-                <span className="text-xs sm:text-sm text-[#68625d] text-left sm:text-right max-w-md font-light">
-                  {item.value}
-                </span>
+                <span className="font-display text-4xl tabular-nums">{String(p.min).padStart(2, '0')} min</span>
+                <span className="mt-1 block text-[13px] leading-snug text-graphite">{p.place}</span>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 7. Project Status */}
-      <section className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12 mb-14">
-        <div className="text-center max-w-2xl mx-auto mb-10">
-          <div className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] text-[#c59b67] mb-2">
-            TIMELINE
-          </div>
-          <h2 className="font-serif-luxury text-3xl sm:text-4xl font-normal text-[#1a1918] tracking-tight mb-3">
-            Project <span className="italic font-serif-luxury text-[#c59b67]">Status</span>
-          </h2>
-          <p className="text-xs sm:text-sm text-[#68625d]">
-            Follow the journey of MYSA Luxe Villas from foundation to finish.
-          </p>
-        </div>
-
-        {/* 5 Milestone Timeline */}
-        <div className="bg-white rounded-[24px] p-8 sm:p-12 border border-[#eae4db] shadow-sm max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-5 gap-6 relative">
-            {/* Connecting progress line (desktop) */}
-            <div className="hidden sm:block absolute top-6 left-[10%] right-[10%] h-px bg-gradient-to-r from-emerald-300 via-[#c59b67]/60 to-[#eae4db]" aria-hidden="true" />
-            {/* Step 1 */}
-            <div className="flex flex-col items-center text-center relative z-10">
-              <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-700 flex items-center justify-center font-bold mb-3 shadow-xs">
-                <Check className="w-5 h-5" />
-              </div>
-              <h4 className="text-xs font-bold text-[#1a1918] mb-1">Foundation & Structure</h4>
-              <span className="text-[10px] font-mono text-emerald-700 font-semibold uppercase">100% Complete</span>
-            </div>
-
-            {/* Step 2 */}
-            <div className="flex flex-col items-center text-center relative z-10">
-              <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-700 flex items-center justify-center font-bold mb-3 shadow-xs">
-                <Check className="w-5 h-5" />
-              </div>
-              <h4 className="text-xs font-bold text-[#1a1918] mb-1">Blockwork & Plastering</h4>
-              <span className="text-[10px] font-mono text-emerald-700 font-semibold uppercase">100% Complete</span>
-            </div>
-
-            {/* Step 3 */}
-            <div className="flex flex-col items-center text-center relative z-10">
-              <div className="w-12 h-12 rounded-full bg-[#c59b67] text-white flex items-center justify-center font-bold mb-3 shadow-md shadow-[#c59b67]/30">
-                <Zap className="w-5 h-5" />
-              </div>
-              <h4 className="text-xs font-bold text-[#1a1918] mb-1">Electrical & Plumbing</h4>
-              <span className="text-[10px] font-mono text-[#c59b67] font-semibold uppercase">In Progress (85%)</span>
-            </div>
-
-            {/* Step 4 */}
-            <div className="flex flex-col items-center text-center relative z-10">
-              <div className="w-12 h-12 rounded-full bg-[#f4f0eb] border border-[#eae4db] text-[#8c827a] flex items-center justify-center font-bold mb-3">
-                <Clock className="w-5 h-5" />
-              </div>
-              <h4 className="text-xs font-bold text-[#8c827a] mb-1">Finishing Touches</h4>
-              <span className="text-[10px] font-mono text-[#8c827a] font-semibold uppercase">Q4 2026</span>
-            </div>
-
-            {/* Step 5 */}
-            <div className="flex flex-col items-center text-center relative z-10">
-              <div className="w-12 h-12 rounded-full bg-[#f4f0eb] border border-[#eae4db] text-[#8c827a] flex items-center justify-center font-bold mb-3">
-                <Clock className="w-5 h-5" />
-              </div>
-              <h4 className="text-xs font-bold text-[#8c827a] mb-1">Handover</h4>
-              <span className="text-[10px] font-mono text-[#8c827a] font-semibold uppercase">Q1 2027</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 8. Location Advantage */}
-      <section className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12 mb-14">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center bg-white rounded-[24px] p-8 sm:p-12 border border-[#eae4db] shadow-sm">
-          <div className="space-y-4 text-left">
-            <div className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] text-[#c59b67]">
-              SURROUNDINGS
-            </div>
-            <h2 className="font-serif-luxury text-3xl sm:text-4xl font-normal text-[#1a1918] tracking-tight">
-              Location <span className="italic font-serif-luxury text-[#c59b67]">Advantage</span>
-            </h2>
-            <p className="text-xs sm:text-sm text-[#68625d] leading-relaxed font-light">
-              Situated in the serene locale of Vettuvankeni, MYSA Luxe Villas offer the perfect balance of peaceful coastal living and convenient urban access.
-            </p>
-
-            <div className="space-y-3 pt-2">
-              <div className="flex items-center gap-3 text-xs sm:text-sm text-[#68625d]">
-                <MapPin className="w-4 h-4 text-[#c59b67] shrink-0" />
-                <span><strong className="text-[#1a1918]">3 Mins:</strong> Prarthana Beach & ECR Drive-In</span>
-              </div>
-              <div className="flex items-center gap-3 text-xs sm:text-sm text-[#68625d]">
-                <MapPin className="w-4 h-4 text-[#c59b67] shrink-0" />
-                <span><strong className="text-[#1a1918]">8 Mins:</strong> The British International School & Gateway International</span>
-              </div>
-              <div className="flex items-center gap-3 text-xs sm:text-sm text-[#68625d]">
-                <MapPin className="w-4 h-4 text-[#c59b67] shrink-0" />
-                <span><strong className="text-[#1a1918]">12 Mins:</strong> Thiruvanmiyur & TIDEL IT Park OMR</span>
-              </div>
-              <div className="flex items-center gap-3 text-xs sm:text-sm text-[#68625d]">
-                <MapPin className="w-4 h-4 text-[#c59b67] shrink-0" />
-                <span><strong className="text-[#1a1918]">18 Mins:</strong> Adyar, Boat Club & Apollo Hospital</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Location Map Visual */}
-          <div className="rounded-[16px] overflow-hidden shadow-sm h-72 sm:h-96 relative bg-[#eae5dc] border border-[#eae4db]">
-            <img
-              src={coastalHorizonEcr}
-              alt="Chennai ECR Coastline Perspective"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-            <div className="absolute bottom-6 left-6 right-6 text-white text-left">
-              <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-[#c59b67] mb-1">
-                <MapPin className="w-3.5 h-3.5" />
-                <span>Vettuvankeni, Chennai</span>
-              </div>
-              <h4 className="font-serif-luxury text-xl font-normal text-white">ECR Coastal Sanctuary</h4>
-              <p className="text-xs text-white/80 mt-1 font-light">Peaceful seaside serenity within minutes of Chennai city center.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 8.5. Official MYSA YouTube Walkthrough & Cinematic Film Section */}
-      <section className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12 mb-12">
-        <div className="bg-white rounded-[24px] border border-[#eae4db] overflow-hidden shadow-sm p-6 sm:p-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4 border-b border-[#eae4db] pb-6">
-            <div className="text-left">
-              <div className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] text-[#9a6f36] mb-2">
-                Official Walkthrough Film
-              </div>
-              <h2 className="font-serif-luxury text-2xl sm:text-4xl font-normal text-[#1a1918] tracking-tight">
-                MYSA Luxe Villas — <span className="italic font-serif-luxury text-[#c59b67]">Official Walkthrough Video</span>
-              </h2>
-            </div>
-            <p className="text-xs font-mono text-[#68625d] max-w-md text-left md:text-right">
-              Watch the full-length architectural video tour of MYSA Luxe Villas on East Coast Road, showcasing double-height living spaces, master loft suites, and private poolside decks.
-            </p>
-          </div>
-
-          {/* Click-to-Play Architectural Video Facade (prevents eager third-party iframe stalls) */}
-          <div className="relative w-full aspect-video bg-[#161513] rounded-sm overflow-hidden border border-[#e6dfd3] shadow-md">
-            {isFilmPlaying ? (
-              <iframe
-                src="https://www.youtube.com/embed/XuMGAoSu3HE?autoplay=1&rel=0&modestbranding=1"
-                title="MYSA Luxe Villas Official Walkthrough & Cinematic Film"
-                className="w-full h-full border-0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
+            {PLACES.map((p) => (
+              <span
+                key={`${p.place}-dot`}
+                data-ruler-mark
+                className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-bronze"
+                style={{ left: `${(p.min / 20) * 100}%` }}
               />
-            ) : (
-              <button
-                type="button"
-                onClick={() => setIsFilmPlaying(true)}
-                className="relative w-full h-full group cursor-pointer text-left"
-                aria-label="Play MYSA Luxe Villas Official Walkthrough Video"
-              >
-                <img
-                  src={oceanfrontVillaTwilight}
-                  alt="MYSA Luxe Villas Official Walkthrough Film Cover"
-                  className="w-full h-full object-cover opacity-85 group-hover:scale-[1.02] transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-black/20" />
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#faf7f2] text-[#161513] flex items-center justify-center shadow-2xl group-hover:bg-[#dfb776] transition-colors mb-4">
-                    <Play className="w-6 h-6 sm:w-7 sm:h-7 fill-current ml-1" />
-                  </div>
-                  <span className="text-[11px] font-mono uppercase tracking-[0.26em] text-[#dfc08f] mb-1">
-                    Architectural Film · 03:45
-                  </span>
-                  <span className="font-serif-luxury text-2xl sm:text-3xl text-white font-normal">
-                    Play Official Walkthrough
-                  </span>
-                </div>
-              </button>
-            )}
+            ))}
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-4 mt-4 px-2 text-[10px] font-mono text-[#8c827a] uppercase tracking-widest">
-            <div>MYSA LUXE VILLAS • VETTUVANKENI ECR</div>
-            <div className="flex items-center gap-4">
-              <span>HD 1080P ARCHITECTURAL FILM</span>
-              <span>•</span>
-              <span>FULL INTERIOR WALKTHROUGH</span>
-            </div>
+          <ul className="mt-14 border-t border-ink md:hidden" data-stagger>
+            {PLACES.map((p) => (
+              <li key={p.place} className="flex items-baseline gap-5 border-b border-line-strong py-5">
+                <span className="w-24 shrink-0 font-display text-3xl tabular-nums">{String(p.min).padStart(2, '0')} min</span>
+                <span className="text-[14px] text-graphite">{p.place}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* Client voice */}
+      <section className="bg-ink py-32 text-paper sm:py-40">
+        <div className="shell">
+          <p className="meta mb-12 text-paper/60" data-reveal>
+            In their words
+          </p>
+          <blockquote className="max-w-6xl font-display text-statement" data-split data-split-by="words">
+            “Unifra didn’t just build houses; they crafted an architectural discipline with timeless calm. Our villa on ECR is more than a home — it is a sanctuary.”
+          </blockquote>
+          <div className="mt-14 flex items-center gap-5" data-reveal>
+            <span className="h-px w-14 bg-gold" />
+            <p className="text-[14px]">
+              Mr. Vikram Chandran <span className="text-paper/60">— Resident, MYSA ECR · Architectural Patron</span>
+            </p>
           </div>
         </div>
       </section>
 
-      {/* 9. Frequently Asked Questions */}
-      <section className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12 mb-14">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <div className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] text-[#c59b67] mb-2">
-            COMMON INQUIRIES
-          </div>
-          <h2 className="font-serif-luxury text-3xl sm:text-4xl font-normal text-[#1a1918] tracking-tight mb-3">
-            Frequently Asked <span className="italic font-serif-luxury text-[#c59b67]">Questions</span>
+      {/* FAQ */}
+      <section className="shell grid gap-12 py-28 sm:py-36 lg:grid-cols-12 lg:gap-8">
+        <div className="lg:col-span-4">
+          <h2 className="font-display text-headline lg:sticky lg:top-32" data-split>
+            Common <span className="serif-italic">questions.</span>
           </h2>
-          <p className="text-xs sm:text-sm text-[#68625d]">
-            Everything you need to know about purchasing a MYSA Luxe Villa.
-          </p>
         </div>
-
-        <div className="space-y-3 max-w-3xl mx-auto">
-          {faqItems.map((faq, index) => {
-            const isOpen = openFaqIndex === index;
+        <div className="border-t border-ink lg:col-span-7 lg:col-start-6">
+          {FAQ.map((item, i) => {
+            const open = openFaq === i;
             return (
-              <div
-                key={index}
-                className="bg-white rounded-[16px] border border-[#eae4db] overflow-hidden transition-all shadow-xs"
-              >
+              <div key={item.q} className="border-b border-line-strong">
                 <button
-                  onClick={() => toggleFaq(index)}
-                  className="w-full px-6 py-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-[#faf8f5] transition-colors"
+                  type="button"
+                  onClick={() => setOpenFaq(open ? null : i)}
+                  aria-expanded={open}
+                  className="flex w-full cursor-pointer items-start justify-between gap-6 py-7 text-left"
                 >
-                  <span className="font-serif-luxury text-sm sm:text-base text-[#1a1918]">
-                    {faq.question}
+                  <span className="font-display text-[clamp(1.45rem,2.2vw,2rem)] leading-[1.15]">{item.q}</span>
+                  <span className="relative mt-3 h-3 w-3 shrink-0" aria-hidden="true">
+                    <span className="absolute left-0 top-1/2 h-px w-3 bg-ink" />
+                    <span className={`absolute left-1/2 top-0 h-3 w-px bg-ink transition-transform duration-500 ${open ? 'scale-y-0' : 'scale-y-100'}`} />
                   </span>
-                  <div className="w-7 h-7 rounded-full border border-[#eae4db] flex items-center justify-center shrink-0 text-[#68625d]">
-                    {isOpen ? <ChevronUp className="w-4 h-4 text-[#c59b67]" /> : <ChevronDown className="w-4 h-4" />}
-                  </div>
                 </button>
-
-                {isOpen && (
-                  <div className="px-6 pb-6 pt-1 text-xs sm:text-sm text-[#68625d] leading-relaxed border-t border-[#f0ece4] bg-[#fbf9f6] font-light text-left">
-                    {faq.answer}
-                  </div>
-                )}
+                <div data-faq-panel className="h-0 overflow-hidden">
+                  <p className="max-w-2xl pb-8 text-[15px] leading-relaxed text-graphite">{item.a}</p>
+                </div>
               </div>
             );
           })}
         </div>
       </section>
 
-      {/* 10. Bottom CTA Banner */}
-      <section className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12">
-        <div className="relative rounded-[32px] overflow-hidden p-8 sm:p-14 bg-[#14120f] border border-[#2b251c] shadow-xl flex flex-col md:flex-row items-center justify-between gap-8">
-          {/* Ambient gold glows */}
-          <div className="absolute -top-28 -right-20 w-80 h-80 rounded-full bg-[#c59b67]/20 blur-3xl pointer-events-none" aria-hidden="true" />
-          <div className="absolute -bottom-28 -left-20 w-80 h-80 rounded-full bg-[#c59b67]/10 blur-3xl pointer-events-none" aria-hidden="true" />
-
-          <div className="relative z-10 max-w-2xl text-center md:text-left">
-            <span className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.24em] text-[#dfb776] font-semibold mb-3">
-              LIMITED AVAILABILITY · 3 OF 6 VILLAS REMAINING
-            </span>
-            <h3 className="font-serif-luxury text-3xl sm:text-4xl font-normal mb-3 leading-tight text-white">
-              Interested in <span className="italic text-[#dfb776]">MYSA</span> Luxe Villas?
-            </h3>
-            <p className="text-xs sm:text-sm text-white/60 font-light leading-relaxed">
-              Contact us today to schedule a private viewing and learn more about this exclusive project — and receive detailed brochure information.
-            </p>
-          </div>
-
-          <div className="relative z-10 shrink-0 flex flex-col sm:flex-row md:flex-col gap-3">
-            <button
-              onClick={onOpenContact}
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-sm bg-[#dfb776] text-[#14120f] font-semibold text-xs font-mono uppercase tracking-wider hover:bg-[#c5a880] transition-all shadow-lg cursor-pointer"
-            >
-              <span>Get in Touch →</span>
-            </button>
-            <button
-              onClick={onOpenBrochure}
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-sm border border-white/20 text-white text-xs font-mono uppercase tracking-wider hover:border-[#dfb776] hover:text-[#dfb776] transition-all cursor-pointer"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Download Brochure</span>
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* 11. Fullscreen High-Resolution Lightbox Modal */}
-      {lightboxIndex !== null && (
-        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex flex-col justify-between p-4 sm:p-6 animate-in fade-in duration-200">
-          {/* Top Control Bar */}
-          <div className="flex items-center justify-between border-b border-white/10 pb-4">
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-serif-luxury text-white tracking-widest uppercase">
-                MYSA LUXE VILLAS
-              </span>
-              <span className="text-gray-500">•</span>
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[#dfb776] px-2 py-0.5 rounded-xs bg-[#dfb776]/10 border border-[#dfb776]/30">
-                {MYSA_VILLA_PHOTOS[lightboxIndex].categoryLabel}
-              </span>
-            </div>
-
-            {/* Counter */}
-            <div className="text-xs font-mono text-gray-300 bg-white/5 border border-white/10 px-3 py-1 rounded-xs">
-              <span className="text-white font-semibold">{lightboxIndex + 1}</span>
-              <span className="text-gray-500"> / </span>
-              <span>{MYSA_VILLA_PHOTOS.length}</span>
-            </div>
-
-            {/* Close */}
-            <button
-              onClick={() => setLightboxIndex(null)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xs bg-white/10 hover:bg-red-500/20 text-gray-300 hover:text-white border border-white/15 hover:border-red-500/40 text-xs font-mono transition-colors cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-              <span className="hidden sm:inline">Close (Esc)</span>
-            </button>
-          </div>
-
-          {/* Center Stage with Previous and Next Controls */}
-          <div className="relative flex-1 flex items-center justify-center my-3 overflow-hidden">
-            {/* Previous Button */}
-            <button
-              onClick={() => setLightboxIndex((prev) => (prev !== null ? (prev - 1 + MYSA_VILLA_PHOTOS.length) % MYSA_VILLA_PHOTOS.length : 0))}
-              className="absolute left-2 sm:left-4 z-20 w-11 h-11 rounded-full bg-black/70 hover:bg-[#dfb776] text-white hover:text-[#0b0c0e] border border-white/20 hover:border-[#dfb776] flex items-center justify-center transition-all shadow-2xl cursor-pointer"
-              aria-label="Previous photograph"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-
-            {/* Current Image */}
-            <div className="max-h-[66vh] max-w-5xl w-full flex items-center justify-center px-12">
-              <img
-                src={MYSA_VILLA_PHOTOS[lightboxIndex].imageUrl}
-                alt={MYSA_VILLA_PHOTOS[lightboxIndex].title}
-                className="max-h-[66vh] max-w-full object-contain rounded-xs border border-white/15 shadow-2xl animate-in zoom-in-95 duration-200"
-              />
-            </div>
-
-            {/* Next Button */}
-            <button
-              onClick={() => setLightboxIndex((prev) => (prev !== null ? (prev + 1) % MYSA_VILLA_PHOTOS.length : 0))}
-              className="absolute right-2 sm:right-4 z-20 w-11 h-11 rounded-full bg-black/70 hover:bg-[#dfb776] text-white hover:text-[#0b0c0e] border border-white/20 hover:border-[#dfb776] flex items-center justify-center transition-all shadow-2xl cursor-pointer"
-              aria-label="Next photograph"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </button>
-          </div>
-
-          {/* Bottom Details Bar */}
-          <div className="border-t border-white/10 pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="text-left max-w-2xl">
-              <div className="flex items-center gap-2 text-[10px] font-mono text-[#dfb776] mb-1">
-                <span>{MYSA_VILLA_PHOTOS[lightboxIndex].area}</span>
-                <span className="text-gray-600">•</span>
-                <span className="text-gray-400">{MYSA_VILLA_PHOTOS[lightboxIndex].location}</span>
-              </div>
-              <h4 className="font-serif-luxury text-lg sm:text-xl text-white font-normal">
-                {MYSA_VILLA_PHOTOS[lightboxIndex].title}
-              </h4>
-              <p className="text-xs text-gray-400 font-light mt-1 line-clamp-2">
-                {MYSA_VILLA_PHOTOS[lightboxIndex].description}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-3 shrink-0">
-              <button
-                onClick={() => {
-                  setLightboxIndex(null);
-                  onOpenVirtualTour();
-                }}
-                className="px-4 py-2.5 rounded-xs border border-white/20 text-white hover:border-[#dfb776] hover:text-[#dfb776] text-xs font-mono uppercase tracking-wider transition-colors cursor-pointer"
-              >
-                3D Tour
-              </button>
-              <button
-                onClick={() => {
-                  setLightboxIndex(null);
-                  onOpenContact();
-                }}
-                className="px-5 py-2.5 rounded-xs bg-[#dfb776] hover:bg-[#c5a880] text-[#0b0c0e] font-semibold text-xs font-mono uppercase tracking-wider transition-colors shadow-lg cursor-pointer"
-              >
-                Inquire on this Space
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {viewer !== null && <ArchiveViewer index={viewer} onChange={setViewer} onClose={() => setViewer(null)} />}
     </div>
   );
 };

@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
-import { Briefcase, Handshake, ArrowRight, MapPin, Clock } from 'lucide-react';
-import { oceanfrontVillaTwilight } from '../../data/mockData';
+import React, { useRef, useState } from 'react';
+import { ArrowUpRight, Plus } from 'lucide-react';
+import { MEDIA } from '../../data/media';
+import { Img } from '../ui';
+import { gsap, useGSAP, prefersReducedMotion, whenRevealed } from '../../lib/gsap';
+import { useScrollFx } from '../../hooks/useScrollFx';
 
 interface VenturesCareersPageProps {
   type: 'ventures' | 'careers';
@@ -9,18 +12,15 @@ interface VenturesCareersPageProps {
 
 const VENTURE_MODELS = [
   {
-    index: '01',
-    title: 'Prime Land Acquisition',
+    title: 'Prime land acquisition',
     desc: 'Direct outright purchase of clear-titled residential land plots in Chennai from 2 grounds up to 5 acres.'
   },
   {
-    index: '02',
-    title: 'Joint Development (JD)',
+    title: 'Joint development',
     desc: 'Attractive revenue or area-sharing models backed by bank guarantees, architectural excellence, and fast turnarounds.'
   },
   {
-    index: '03',
-    title: 'Turnkey Villa Development',
+    title: 'Turnkey villa development',
     desc: 'End-to-end bespoke villa construction for private landowners seeking Swedish or European contemporary design.'
   }
 ];
@@ -29,179 +29,173 @@ const OPEN_ROLES = [
   {
     title: 'Senior Architectural Project Manager',
     type: 'Full-time',
-    location: 'Chennai (T. Nagar HQ & ECR Sites)',
-    exp: '5-8 Years',
+    location: 'Chennai — T. Nagar HQ & ECR sites',
+    exp: '5–8 years',
     desc: 'Lead execution of luxury villa enclaves, oversee structural contractors, and enforce high-tolerance finishes.'
   },
   {
     title: 'Interior Design Curator & 3D Visualizer',
     type: 'Full-time',
     location: 'Chennai HQ',
-    exp: '3-5 Years',
+    exp: '3–5 years',
     desc: 'Curate Scandinavian and European interior palettes, millwork joinery details, and spatial styling.'
   },
   {
     title: 'Luxury Real Estate Client Relationship Manager',
     type: 'Full-time',
     location: 'Chennai & ECR Experience Center',
-    exp: '2-4 Years',
+    exp: '2–4 years',
     desc: 'Manage high-net-worth client relationships, coordinate private villa viewings, and guide buying journeys.'
   }
 ];
 
 export const VenturesCareersPage: React.FC<VenturesCareersPageProps> = ({ type, onOpenContact }) => {
-  const [activeTab, setActiveTab] = useState<'ventures' | 'careers'>(type);
+  const pageRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const [tab, setTab] = useState<'ventures' | 'careers'>(type);
+  const [openRole, setOpenRole] = useState<number | null>(0);
+
+  // Crossfade the body when the tab changes
+  useGSAP(
+    () => {
+      if (prefersReducedMotion() || !bodyRef.current) return;
+      const anim = gsap.from(bodyRef.current.children, { y: 40, autoAlpha: 0, duration: 1.1, stagger: 0.08, ease: 'expo.out', paused: true });
+      return whenRevealed(() => anim.play());
+    },
+    { dependencies: [tab], scope: bodyRef, revertOnUpdate: true }
+  );
+
+  // Accordion height
+  useGSAP(
+    () => {
+      const panels = gsap.utils.toArray<HTMLElement>('[data-role-panel]');
+      panels.forEach((panel, i) => {
+        gsap.to(panel, {
+          height: openRole === i ? 'auto' : 0,
+          duration: prefersReducedMotion() ? 0 : 0.8,
+          ease: 'expo.inOut'
+        });
+      });
+    },
+    { dependencies: [openRole, tab], scope: bodyRef }
+  );
+
+  useScrollFx(pageRef, [tab]);
 
   return (
-    <div className="pt-20 sm:pt-24 pb-12 sm:pb-14 bg-[#faf8f5] text-[#1a1918]">
-      <div className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12">
-        {/* Editorial tab switcher */}
-        <div className="flex items-center justify-center gap-8 sm:gap-12 mb-10 sm:mb-12">
-          <button
-            onClick={() => setActiveTab('ventures')}
-            className={`group flex items-center gap-2.5 pb-3 border-b-2 transition-all cursor-pointer ${
-              activeTab === 'ventures'
-                ? 'border-[#c59b67] text-[#1a1918]'
-                : 'border-transparent text-[#8c827a] hover:text-[#1a1918]'
-            }`}
-          >
-            <Handshake className={`w-4 h-4 ${activeTab === 'ventures' ? 'text-[#c59b67]' : 'text-[#b3aaa0] group-hover:text-[#c59b67]'} transition-colors`} />
-            <span className="text-[11px] sm:text-xs font-mono uppercase tracking-[0.22em] font-semibold">Joint Ventures & Land</span>
-          </button>
-          <span className="h-6 w-px bg-[#d8cebe]" />
-          <button
-            onClick={() => setActiveTab('careers')}
-            className={`group flex items-center gap-2.5 pb-3 border-b-2 transition-all cursor-pointer ${
-              activeTab === 'careers'
-                ? 'border-[#c59b67] text-[#1a1918]'
-                : 'border-transparent text-[#8c827a] hover:text-[#1a1918]'
-            }`}
-          >
-            <Briefcase className={`w-4 h-4 ${activeTab === 'careers' ? 'text-[#c59b67]' : 'text-[#b3aaa0] group-hover:text-[#c59b67]'} transition-colors`} />
-            <span className="text-[11px] sm:text-xs font-mono uppercase tracking-[0.22em] font-semibold">Careers at Unifra</span>
-          </button>
+    <div ref={pageRef} className="bg-paper pb-32 pt-36 text-ink sm:pt-44">
+      <div className="shell">
+        <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2 font-display text-[clamp(3rem,8vw,8.5rem)] leading-[0.95] tracking-[-0.03em]" role="tablist" aria-label="Ventures or careers">
+          {(['ventures', 'careers'] as const).map((key, i) => (
+            <React.Fragment key={key}>
+              {i === 1 && <span className="text-line-strong">/</span>}
+              <button
+                type="button"
+                role="tab"
+                aria-selected={tab === key}
+                onClick={() => setTab(key)}
+                className={`cursor-pointer capitalize transition-colors duration-700 ${tab === key ? 'serif-italic text-ink' : 'text-line-strong hover:text-ash'}`}
+              >
+                {key}
+              </button>
+            </React.Fragment>
+          ))}
         </div>
+      </div>
 
-        {activeTab === 'ventures' ? (
-          <div className="animate-in fade-in duration-300">
-            {/* Split hero */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center mb-14 sm:mb-16">
-              <div className="lg:col-span-6 space-y-6">
-                <div className="text-[11px] font-mono uppercase tracking-[0.26em] text-[#9a6f36]">
-                  Partnerships &amp; Acquisition
-                </div>
-                <h1 className="font-serif-luxury text-4xl sm:text-6xl font-normal text-[#1a1918] tracking-tight leading-[1.05]">
-                  Partner With Us on{' '}
-                  <span className="italic font-serif-luxury text-[#c59b67]">Land & Development</span>
+      <div ref={bodyRef} className="shell">
+        {tab === 'ventures' ? (
+          <>
+            <section className="mt-20 grid gap-14 lg:grid-cols-12 lg:gap-8">
+              <div className="lg:col-span-5">
+                <p className="meta text-graphite">Partnerships & acquisition</p>
+                <h1 className="mt-6 font-display text-headline">
+                  Partner with us on <span className="serif-italic">land & development.</span>
                 </h1>
-                <p className="text-xs sm:text-sm text-[#68625d] leading-relaxed font-light max-w-xl">
-                  Do you own prime residential land along Chennai's ECR, OMR, or prime city locations? Unlock unmatched value through transparent joint ventures and custom luxury villa developments with Unifra.
+                <p className="mt-8 max-w-md text-[17px] leading-relaxed text-graphite">
+                  Own prime residential land along Chennai’s ECR, OMR or in the city? Unlock its full value through transparent joint ventures and custom luxury villa developments with Unifra.
                 </p>
-                <button
-                  onClick={onOpenContact}
-                  className="inline-flex items-center gap-2 px-8 py-4 rounded-sm bg-[#1a1918] hover:bg-[#2b2723] text-white font-medium text-xs font-mono uppercase tracking-wider transition-colors cursor-pointer shadow-sm"
-                >
-                  <span>Propose a Land Parcel or Joint Venture</span>
-                  <ArrowRight className="w-4 h-4 text-[#c59b67]" />
+                <button type="button" onClick={onOpenContact} className="btn btn-ink mt-10">
+                  Propose a land parcel
+                  <ArrowUpRight className="h-4 w-4" />
                 </button>
               </div>
-
-              <div className="lg:col-span-6">
-                <div className="relative max-w-[520px] mx-auto h-[420px] sm:h-[520px] rounded-t-[260px] rounded-b-[24px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.10)] border border-[#eae4db] bg-[#eae5dc]">
-                  <img
-                    src={oceanfrontVillaTwilight}
-                    alt="Unifra coastal residence"
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                </div>
+              <div className="relative aspect-[5/4] overflow-hidden bg-stone lg:col-span-6 lg:col-start-7" data-clip="up">
+                <Img media={MEDIA.oceanfront} alt="Coastal residence at twilight" sizes="(min-width: 1024px) 50vw, 100vw" className="parallax-img" data-parallax="8" />
               </div>
-            </div>
+            </section>
 
-            {/* Numbered engagement models */}
-            <div className="border-t border-[#eae4db]">
-              {VENTURE_MODELS.map((model) => (
-                <div
-                  key={model.index}
-                  className="group grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8 items-baseline py-8 sm:py-10 border-b border-[#eae4db] hover:bg-[#f4f0eb]/60 transition-colors px-2 sm:px-4"
-                >
-                  <span className="md:col-span-1 font-serif-luxury italic text-2xl sm:text-3xl text-[#c59b67]">
-                    {model.index}
-                  </span>
-                  <h3 className="md:col-span-4 font-serif-luxury text-2xl sm:text-3xl font-normal text-[#1a1918] tracking-tight group-hover:text-[#9b6f1e] transition-colors">
-                    {model.title}
-                  </h3>
-                  <p className="md:col-span-6 text-xs sm:text-sm text-[#68625d] leading-relaxed font-light">
-                    {model.desc}
-                  </p>
-                  <span className="hidden md:block md:col-span-1 text-right text-[#c59b67] opacity-0 group-hover:opacity-100 transition-opacity">
-                    →
-                  </span>
+            <section className="mt-28 grid gap-px bg-line md:grid-cols-3">
+              {VENTURE_MODELS.map((model, i) => (
+                <div key={model.title} className="flex min-h-[320px] flex-col justify-between bg-paper p-8 pt-10 md:first:pl-0">
+                  <span className="font-display text-[5.5rem] leading-none text-line-strong">{String(i + 1).padStart(2, '0')}</span>
+                  <div>
+                    <h2 className="font-display text-[2.2rem] leading-[1.02]">{model.title}</h2>
+                    <p className="mt-4 text-[15px] leading-relaxed text-graphite">{model.desc}</p>
+                  </div>
                 </div>
               ))}
-            </div>
-          </div>
+            </section>
+          </>
         ) : (
-          <div className="animate-in fade-in duration-300">
-            {/* Careers hero */}
-            <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
-              <div className="text-[11px] font-mono uppercase tracking-[0.26em] text-[#9a6f36] mb-4">
-                Opportunities
-              </div>
-              <h1 className="font-serif-luxury text-4xl sm:text-6xl font-normal text-[#1a1918] tracking-tight mb-5 leading-[1.05]">
-                Build the Future of{' '}
-                <span className="italic font-serif-luxury text-[#c59b67]">Luxury Living</span>
+          <>
+            <section className="mt-20 grid gap-10 lg:grid-cols-12">
+              <h1 className="font-display text-headline lg:col-span-7">
+                Build the future of <span className="serif-italic">luxury living.</span>
               </h1>
-              <p className="text-xs sm:text-sm text-[#68625d] leading-relaxed font-light">
-                Join a dynamic team of architects, project engineers, interior curators, and customer concierges redefining contemporary residential design in South India.
+              <p className="max-w-md text-[17px] leading-relaxed text-graphite lg:col-span-4 lg:col-start-9">
+                Join architects, project engineers, interior curators and client concierges redefining contemporary residential design in South India.
               </p>
-            </div>
+            </section>
 
-            {/* Editorial job listings */}
-            <div className="max-w-4xl mx-auto border-t border-[#eae4db]">
-              {OPEN_ROLES.map((job) => (
-                <div
-                  key={job.title}
-                  className="group grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-6 items-start py-8 sm:py-9 border-b border-[#eae4db] hover:bg-[#f4f0eb]/60 transition-colors px-2 sm:px-4"
-                >
-                  <div className="sm:col-span-8 space-y-2">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <h3 className="font-serif-luxury text-xl sm:text-2xl font-normal text-[#1a1918] tracking-tight group-hover:text-[#9b6f1e] transition-colors">
-                        {job.title}
-                      </h3>
-                      <span className="px-2.5 py-1 rounded-sm bg-[#c59b67]/12 border border-[#c59b67]/25 text-[#9b6f1e] text-[9px] font-mono font-semibold uppercase tracking-wider">
-                        {job.type}
-                      </span>
-                    </div>
-                    <p className="text-xs sm:text-sm text-[#68625d] max-w-xl font-light leading-relaxed">{job.desc}</p>
-                    <div className="flex flex-wrap items-center gap-5 text-[10px] font-mono text-[#8c827a] pt-1 uppercase tracking-wider">
-                      <span className="flex items-center gap-1.5">
-                        <MapPin className="w-3 h-3 text-[#c59b67]" />
-                        {job.location}
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <Clock className="w-3 h-3 text-[#c59b67]" />
-                        Exp: {job.exp}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="sm:col-span-4 sm:text-right">
+            <section className="mt-20 border-t border-ink">
+              {OPEN_ROLES.map((role, i) => {
+                const open = openRole === i;
+                return (
+                  <div key={role.title} className="border-b border-line">
                     <button
-                      onClick={onOpenContact}
-                      className="inline-flex items-center gap-2 px-5 py-3 rounded-sm border border-[#d8cebe] text-[10px] font-mono uppercase tracking-wider text-[#1a1918] hover:border-[#1a1918] hover:bg-[#1a1918] hover:text-white transition-all cursor-pointer"
+                      type="button"
+                      onClick={() => setOpenRole(open ? null : i)}
+                      aria-expanded={open}
+                      className="group grid w-full cursor-pointer items-center gap-4 py-8 text-left sm:grid-cols-12"
                     >
-                      <span>Apply Now</span>
-                      <ArrowRight className="w-3.5 h-3.5 text-[#c59b67]" />
+                      <span className="text-[13px] tabular-nums text-ash sm:col-span-1">{String(i + 1).padStart(2, '0')}</span>
+                      <span className="font-display text-[clamp(1.9rem,3.2vw,3.2rem)] leading-[1.02] sm:col-span-7">{role.title}</span>
+                      <span className="text-[13px] text-graphite sm:col-span-3">
+                        {role.type} · {role.exp}
+                      </span>
+                      <span className="flex sm:col-span-1 sm:justify-end">
+                        <span className={`flex h-11 w-11 items-center justify-center rounded-full border transition-all duration-700 ease-luxe ${open ? 'rotate-45 border-ink bg-ink text-paper' : 'border-line-strong'}`}>
+                          <Plus className="h-4 w-4" />
+                        </span>
+                      </span>
                     </button>
+                    <div data-role-panel className="h-0 overflow-hidden">
+                      <div className="grid gap-6 pb-10 sm:grid-cols-12">
+                        <div className="sm:col-span-6 sm:col-start-2">
+                          <p className="text-[17px] leading-relaxed text-ink-soft">{role.desc}</p>
+                          <p className="mt-4 text-[14px] text-graphite">{role.location}</p>
+                        </div>
+                        <div className="sm:col-span-4 sm:col-start-9 sm:justify-self-end">
+                          <button type="button" onClick={onOpenContact} className="btn btn-line">
+                            Apply now
+                            <ArrowUpRight className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                );
+              })}
+            </section>
 
-            <p className="text-center text-[10px] font-mono uppercase tracking-[0.24em] text-[#8c827a] mt-10">
-              Don't see your role? Write to <span className="text-[#9b6f1e] font-semibold">careers@unifra.in</span>
+            <p className="mt-12 text-[15px] text-graphite">
+              Don’t see your role? Write to{' '}
+              <a href="mailto:careers@unifra.in" className="u-draw text-ink">
+                careers@unifra.in
+              </a>
             </p>
-          </div>
+          </>
         )}
       </div>
     </div>

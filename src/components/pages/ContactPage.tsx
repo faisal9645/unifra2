@@ -1,20 +1,9 @@
-import React, { useState } from 'react';
-import {
-  Send,
-  MapPin,
-  Phone,
-  Mail,
-  Clock,
-  CheckCircle2,
-  ExternalLink,
-  Navigation,
-  Building,
-  Car,
-  CalendarDays,
-  User,
-  MessageSquare
-} from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { ArrowUpRight, Check } from 'lucide-react';
 import { saveLead } from '../../utils/leadsStorage';
+import { useScrollFx } from '../../hooks/useScrollFx';
+import { MEDIA } from '../../data/media';
+import { Img } from '../ui';
 
 interface ContactPageProps {
   /** Preselects the "I'm interested in" field, e.g. when arriving from a project CTA. */
@@ -24,44 +13,57 @@ interface ContactPageProps {
 const INTEREST_OPTIONS = [
   'Buying a MYSA Luxe Villa (ECR)',
   'Scheduling an ECR Site Visit',
-  'Azure Enclave Oceanfront Mansions',
+  'Upcoming enclaves — early access',
   'Joint Venture / Turnkey Plot Build',
   'Architectural Consultancy',
   'General Inquiry'
 ];
 
-const TIME_SLOTS = [
-  '11:00 AM — Morning',
-  '2:00 PM — Afternoon',
-  '4:30 PM — Golden Hour'
-];
+const TIME_SLOTS = ['11:00 AM — Morning', '2:00 PM — Afternoon', '4:30 PM — Golden Hour'];
+
+const emptyForm = (interest: string) => ({
+  name: '',
+  phone: '',
+  email: '',
+  interest,
+  preferredDate: '',
+  preferredTime: TIME_SLOTS[0],
+  chauffeurPickUp: true,
+  pickupLocation: '',
+  message: ''
+});
+
+const Chip: React.FC<{ active: boolean; onClick: () => void; children: React.ReactNode }> = ({ active, onClick, children }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    aria-pressed={active}
+    className={`flex min-h-10 cursor-pointer items-center gap-2 rounded-full border px-4 py-2 text-left text-[13px] transition-colors duration-300 ${
+      active ? 'border-ink bg-ink text-paper' : 'border-line-strong text-graphite hover:border-ink hover:text-ink'
+    }`}
+  >
+    {active && <Check className="h-3.5 w-3.5 shrink-0" />}
+    {children}
+  </button>
+);
 
 export const ContactPage: React.FC<ContactPageProps> = ({ presetInterest }) => {
+  const pageRef = useRef<HTMLDivElement>(null);
   const interestOptions =
-    presetInterest && !INTEREST_OPTIONS.includes(presetInterest)
-      ? [presetInterest, ...INTEREST_OPTIONS]
-      : INTEREST_OPTIONS;
+    presetInterest && !INTEREST_OPTIONS.includes(presetInterest) ? [presetInterest, ...INTEREST_OPTIONS] : INTEREST_OPTIONS;
 
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    interest: presetInterest || 'Buying a MYSA Luxe Villa (ECR)',
-    preferredDate: '',
-    preferredTime: TIME_SLOTS[0],
-    chauffeurPickUp: true,
-    pickupLocation: '',
-    message: ''
-  });
+  const [formData, setFormData] = useState(() => emptyForm(presetInterest || INTEREST_OPTIONS[0]));
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  useScrollFx(pageRef, [isSubmitted]);
+
+  const wantsVisit = formData.interest === 'Scheduling an ECR Site Visit';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.phone.trim()) return;
 
     setSubmitting(true);
-    const wantsVisit = formData.interest === 'Scheduling an ECR Site Visit';
     const notes = [
       formData.message,
       wantsVisit || formData.preferredDate
@@ -70,7 +72,9 @@ export const ContactPage: React.FC<ContactPageProps> = ({ presetInterest }) => {
       formData.chauffeurPickUp && (wantsVisit || formData.preferredDate)
         ? `Chauffeur pick-up: Yes${formData.pickupLocation ? ` (${formData.pickupLocation})` : ''}.`
         : ''
-    ].filter(Boolean).join(' ');
+    ]
+      .filter(Boolean)
+      .join(' ');
 
     saveLead({
       name: formData.name,
@@ -88,364 +92,230 @@ export const ContactPage: React.FC<ContactPageProps> = ({ presetInterest }) => {
     }, 600);
   };
 
-  const inputCls =
-    'w-full px-4 py-3.5 rounded-sm border border-[#e5ded4] bg-[#faf8f5] focus:border-[#1a1918] outline-none text-sm text-[#1a1918] transition-all';
-  const labelCls = 'block text-[10px] font-mono font-semibold uppercase tracking-wider text-[#8c827a] mb-2';
-
   return (
-    <div className="pt-20 pb-12 bg-[#faf8f5] text-[#1a1918]">
-      {/* 1. Hero Banner */}
-      <section className="relative w-full mb-10 px-6 sm:px-10 lg:px-12">
-        <div className="max-w-[1380px] mx-auto bg-[#fbf9f6] rounded-[32px] p-8 sm:p-14 lg:p-16 border border-[#eae4db] grid grid-cols-1 lg:grid-cols-12 gap-10 items-center shadow-sm">
-          <div className="lg:col-span-7 space-y-6 text-left">
-            <div className="text-[11px] font-mono uppercase tracking-[0.26em] text-[#9a6f36] font-medium">
-              Private Inquiries, Visits &amp; Advisory
-            </div>
-            <h1 className="font-serif-luxury text-4xl sm:text-6xl lg:text-7xl font-normal tracking-tight text-[#1a1918] leading-[1.08]">
-              Contact <span className="italic font-serif-luxury text-[#c59b67]">Unifra.</span>
-            </h1>
-            <p className="text-base sm:text-lg text-[#68625d] font-light leading-relaxed max-w-xl">
-              One form for everything — general inquiries, private ECR site visits with chauffeur pick-up, villa purchases, joint ventures, and architectural consultancy.
-            </p>
-            <div className="pt-2 flex flex-wrap items-center gap-6 text-xs font-mono text-[#8c827a]">
-              <div><strong className="text-[#1a1918] text-sm block">Direct Line</strong> +91 73582 22445</div>
-              <div className="w-px h-6 bg-[#eae4db]" />
-              <div><strong className="text-[#1a1918] text-sm block">Concierge</strong> info@unifra.in</div>
-              <div className="w-px h-6 bg-[#eae4db]" />
-              <div><strong className="text-[#1a1918] text-sm block">Experience</strong> Vettuvankeni ECR</div>
-            </div>
-          </div>
+    <div ref={pageRef} className="bg-paper pb-32 pt-36 text-ink sm:pt-44">
+      <header className="shell">
+        <p className="meta text-graphite" data-reveal="load">
+          Private inquiries, visits & advisory
+        </p>
+        <h1 className="mt-8 font-display text-display">
+          <span className="block" data-split="load">
+            Let’s find your
+          </span>
+          <span className="block serif-italic" data-split="load" data-delay="0.12">
+            sanctuary.
+          </span>
+        </h1>
+      </header>
 
-          <div className="lg:col-span-5">
-            <div className="relative rounded-t-[140px] rounded-b-[24px] overflow-hidden border border-[#eae4db] shadow-md h-[340px] sm:h-[400px]">
-              <img
-                src="/images/mysa3d/mysa-day.jpg"
-                alt="MYSA Luxe Villas Arrival Elevation"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute bottom-4 left-6 right-6 p-3.5 bg-[#faf7f2]/95 backdrop-blur-md rounded-sm border border-[#e5ddd0] text-center">
-                <span className="text-[10px] font-mono tracking-[0.2em] text-[#161513] uppercase block font-medium">
-                  MYSA Experience Pavilion · ECR
-                </span>
+      <div className="shell mt-20 grid gap-16 lg:grid-cols-12 lg:gap-8">
+        {/* Details */}
+        <aside className="lg:col-span-4">
+          <div className="space-y-10 lg:sticky lg:top-32">
+            <div className="relative aspect-[4/3] overflow-hidden bg-stone" data-clip="up" data-clip-mode="load">
+              <Img media={MEDIA.bedroomGround} alt="Garden suite opening onto the courtyard" sizes="(min-width: 1024px) 30vw, 100vw" className="img-cover" />
+            </div>
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-1" data-stagger="load">
+              <div>
+                <p className="meta mb-3 text-ash">Direct line</p>
+                <a href="tel:+917358222445" className="u-draw font-display text-3xl tabular-nums">
+                  +91 73582 22445
+                </a>
+              </div>
+              <div>
+                <p className="meta mb-3 text-ash">Concierge</p>
+                <a href="mailto:info@unifra.in" className="u-draw font-display text-3xl">
+                  info@unifra.in
+                </a>
+              </div>
+              <div>
+                <p className="meta mb-3 text-ash">Corporate office</p>
+                <p className="text-[15px] leading-relaxed">
+                  4/11, G R Mansion, 2nd Floor, Srinivasa Rd, T. Nagar, Chennai 600017
+                  <br />
+                  <span className="text-graphite">Mon – Sat · 9:30 AM – 6:30 PM</span>
+                </p>
+              </div>
+              <div>
+                <p className="meta mb-3 text-ash">ECR Experience Pavilion</p>
+                <p className="text-[15px] leading-relaxed">
+                  MYSA Enclave, 122 East Coast Road, Vettuvankeni, Chennai 600115
+                  <br />
+                  <span className="text-graphite">Daily · 10:00 AM – 6:00 PM, by appointment</span>
+                </p>
+                <p className="mt-3 text-[14px] text-graphite">Sample villa walkthrough, material library & 3D flythrough.</p>
+                <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="group mt-4 inline-flex items-center gap-2 text-[14px] font-medium">
+                  <span className="u-draw">Open in Google Maps</span>
+                  <ArrowUpRight className="h-4 w-4" />
+                </a>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </aside>
 
-      {/* 2. Unified Form Section */}
-      <section id="inquiry-form" className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12 mb-14">
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <div className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] text-[#c59b67] mb-2">
-            ONE FORM • EVERY PURPOSE
-          </div>
-          <h2 className="font-serif-luxury text-3xl sm:text-5xl font-normal text-[#1a1918] tracking-tight mb-4">
-            Begin Your <span className="italic font-serif-luxury text-[#c59b67]">Journey</span>
-          </h2>
-          <p className="text-xs sm:text-sm text-[#68625d] leading-relaxed font-light">
-            Tell us what you're looking for. Our senior advisory team responds within 2 business hours.
-          </p>
-        </div>
-
-        {/* Unified Form Card */}
-        <div className="max-w-3xl mx-auto bg-white rounded-[24px] p-8 sm:p-12 border border-[#eae4db] shadow-sm">
+        {/* Form */}
+        <section id="inquiry-form" className="lg:col-span-7 lg:col-start-6">
           {isSubmitted ? (
-            <div className="text-center py-10 animate-in fade-in zoom-in-95 duration-400">
-              <div className="w-16 h-16 rounded-full bg-[#c59b67]/10 text-[#c59b67] flex items-center justify-center mx-auto mb-4">
-                <CheckCircle2 className="w-8 h-8" />
-              </div>
-              <h3 className="font-serif-luxury text-2xl font-bold text-[#1a1918] mb-2">
-                Thank You, {formData.name || 'Valued Client'}!
-              </h3>
-              <p className="text-xs sm:text-sm text-[#68625d] max-w-md mx-auto mb-6 font-light">
-                Your inquiry regarding <strong className="text-[#1a1918]">{formData.interest}</strong> has been received.
-                {formData.preferredDate || formData.interest === 'Scheduling an ECR Site Visit'
-                  ? ` We will confirm your visit for ${formData.preferredDate || 'an upcoming day'} at ${formData.preferredTime.split(' — ')[0]} at `
-                  : ' We will contact you at '}
-                <strong className="text-[#c59b67] font-mono">{formData.phone}</strong> shortly.
+            <div className="border-t border-ink pt-12" data-reveal>
+              <img src="/images/unifra-emblem-gold.png" alt="" className="h-16 w-16 object-contain" />
+              <h2 className="mt-8 font-display text-headline">
+                Thank you, <span className="serif-italic">{formData.name || 'valued client'}.</span>
+              </h2>
+              <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-graphite">
+                Your inquiry regarding <strong className="font-medium text-ink">{formData.interest}</strong> has been received.
+                {formData.preferredDate || wantsVisit
+                  ? ` We will confirm your visit for ${formData.preferredDate || 'an upcoming day'} at ${formData.preferredTime.split(' — ')[0]} on `
+                  : ' Our senior advisory team will call you on '}
+                <strong className="font-medium text-ink tabular-nums">{formData.phone}</strong> shortly.
               </p>
               <button
+                type="button"
                 onClick={() => {
                   setIsSubmitted(false);
-                  setFormData({
-                    name: '',
-                    phone: '',
-                    email: '',
-                    interest: 'Buying a MYSA Luxe Villa (ECR)',
-                    preferredDate: '',
-                    preferredTime: TIME_SLOTS[0],
-                    chauffeurPickUp: true,
-                    pickupLocation: '',
-                    message: ''
-                  });
+                  setFormData(emptyForm(INTEREST_OPTIONS[0]));
                 }}
-                className="px-8 py-3.5 rounded-sm bg-[#1a1918] text-white text-xs font-mono uppercase tracking-wider font-medium hover:bg-[#2b2723] transition-colors cursor-pointer"
+                className="btn btn-line mt-10"
               >
-                Send Another Inquiry
+                Send another inquiry
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-6 text-left">
-              {/* Identity */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div>
-                  <label className={labelCls}>
-                    <span className="inline-flex items-center gap-1.5"><User className="w-3 h-3 text-[#c59b67]" /> Your Name *</span>
-                  </label>
+            <form onSubmit={handleSubmit} className="border-t border-ink pt-10">
+              <p className="text-[15px] text-graphite" data-reveal="load" data-delay="0.3">
+                One form for everything. Our senior advisory team responds within two business hours.
+              </p>
+
+              <fieldset className="mt-12" data-reveal="load" data-delay="0.4">
+                <legend className="text-[13px] font-medium">I’m interested in</legend>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {interestOptions.map((opt) => (
+                    <Chip key={opt} active={formData.interest === opt} onClick={() => setFormData({ ...formData, interest: opt })}>
+                      {opt}
+                    </Chip>
+                  ))}
+                </div>
+              </fieldset>
+
+              <div className="mt-12 grid gap-x-10 gap-y-8 sm:grid-cols-2" data-stagger>
+                <label className="block">
+                  <span className="text-[13px] font-medium">Your name *</span>
                   <input
                     type="text"
                     required
+                    autoComplete="name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. Anand Kumar"
-                    className={inputCls}
+                    className="field"
                   />
-                </div>
-
-                <div>
-                  <label className={labelCls}>Phone Number *</label>
+                </label>
+                <label className="block">
+                  <span className="text-[13px] font-medium">Phone number *</span>
                   <input
                     type="tel"
                     required
+                    autoComplete="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="+91 98400 12345"
-                    className={`${inputCls} font-mono`}
+                    className="field tabular-nums"
                   />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div>
-                  <label className={labelCls}>Email Address</label>
+                </label>
+                <label className="block sm:col-span-2">
+                  <span className="text-[13px] font-medium text-graphite">Email address</span>
                   <input
                     type="email"
+                    autoComplete="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="name@company.com"
-                    className={`${inputCls} font-mono`}
+                    className="field"
                   />
-                </div>
-
-                <div>
-                  <label className={labelCls}>I'm interested in</label>
-                  <select
-                    value={formData.interest}
-                    onChange={(e) => setFormData({ ...formData, interest: e.target.value })}
-                    className={inputCls}
-                  >
-                    {interestOptions.map((opt) => (
-                      <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                  </select>
-                </div>
+                </label>
               </div>
 
-              {/* Visit scheduling (shown for site visit, optional otherwise) */}
-              <div className="rounded-[16px] border border-[#eae4db] bg-[#fbf9f6] p-5 sm:p-6 space-y-5">
-                <div className="flex items-center gap-2 text-[10px] font-mono font-semibold uppercase tracking-wider text-[#c59b67]">
-                  <CalendarDays className="w-3.5 h-3.5" />
-                  <span>Preferred Visit — Optional (or required for Site Visit requests)</span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div>
-                    <label className={labelCls}>Preferred Date</label>
+              <div className="mt-14 bg-mist p-6 sm:p-10" data-reveal>
+                <p className="text-[13px] font-medium">
+                  Preferred visit{' '}
+                  <span className="font-normal text-graphite">— {wantsVisit ? 'required for site visits' : 'optional'}</span>
+                </p>
+                <div className="mt-6 grid gap-8 sm:grid-cols-2">
+                  <label className="block">
+                    <span className="text-[13px] text-graphite">Date</span>
                     <input
                       type="date"
+                      required={wantsVisit}
                       value={formData.preferredDate}
                       onChange={(e) => setFormData({ ...formData, preferredDate: e.target.value })}
-                      className={`${inputCls} font-mono`}
+                      className="field tabular-nums"
                     />
-                  </div>
+                  </label>
                   <div>
-                    <label className={labelCls}>Preferred Time</label>
-                    <select
-                      value={formData.preferredTime}
-                      onChange={(e) => setFormData({ ...formData, preferredTime: e.target.value })}
-                      className={inputCls}
-                    >
+                    <span className="text-[13px] text-graphite">Time</span>
+                    <div className="mt-3 flex flex-wrap gap-2">
                       {TIME_SLOTS.map((t) => (
-                        <option key={t} value={t}>{t}</option>
+                        <Chip key={t} active={formData.preferredTime === t} onClick={() => setFormData({ ...formData, preferredTime: t })}>
+                          {t.split(' — ')[0]}
+                          <span className={formData.preferredTime === t ? 'text-paper/60' : 'text-ash'}>{t.split(' — ')[1]}</span>
+                        </Chip>
                       ))}
-                    </select>
+                    </div>
                   </div>
                 </div>
 
-                <label className="flex items-center gap-3 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={formData.chauffeurPickUp}
-                    onChange={(e) => setFormData({ ...formData, chauffeurPickUp: e.target.checked })}
-                    className="w-4 h-4 accent-[#c59b67] cursor-pointer"
-                  />
-                  <span className="inline-flex items-center gap-1.5 text-xs text-[#1a1918]">
-                    <Car className="w-3.5 h-3.5 text-[#c59b67]" />
-                    Arrange complimentary chauffeur pick-up
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={formData.chauffeurPickUp}
+                  onClick={() => setFormData({ ...formData, chauffeurPickUp: !formData.chauffeurPickUp })}
+                  className="mt-8 flex cursor-pointer items-center gap-4 text-[14px]"
+                >
+                  <span className={`relative h-6 w-11 rounded-full transition-colors duration-500 ${formData.chauffeurPickUp ? 'bg-ink' : 'bg-line-strong'}`}>
+                    <span
+                      className={`absolute top-1 h-4 w-4 rounded-full bg-paper transition-transform duration-500 ease-luxe ${
+                        formData.chauffeurPickUp ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
                   </span>
-                </label>
+                  Arrange complimentary chauffeur pick-up
+                </button>
 
                 {formData.chauffeurPickUp && (
-                  <div>
-                    <label className={labelCls}>Pick-up Location</label>
+                  <label className="mt-6 block">
+                    <span className="text-[13px] text-graphite">Pick-up location</span>
                     <input
                       type="text"
                       value={formData.pickupLocation}
                       onChange={(e) => setFormData({ ...formData, pickupLocation: e.target.value })}
                       placeholder="Residence, hotel, or Chennai International Airport"
-                      className={inputCls}
+                      className="field"
                     />
-                  </div>
+                  </label>
                 )}
               </div>
 
-              <div>
-                <label className={labelCls}>
-                  <span className="inline-flex items-center gap-1.5"><MessageSquare className="w-3 h-3 text-[#c59b67]" /> Message</span>
-                </label>
+              <label className="mt-12 block" data-reveal>
+                <span className="text-[13px] font-medium">Message</span>
                 <textarea
                   rows={4}
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  placeholder="Tell us more about your inquiry, preferred villa size, or timeline..."
-                  className={`${inputCls} font-light`}
+                  placeholder="Tell us about your inquiry, preferred villa size, or timeline…"
+                  className="field resize-none"
                 />
-              </div>
+              </label>
 
-              <div>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full py-4 rounded-sm bg-[#1a1918] hover:bg-[#2b2723] text-white font-medium text-xs font-mono tracking-[0.2em] uppercase shadow-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer disabled:opacity-75"
-                >
-                  <Send className="w-3.5 h-3.5 text-[#c59b67]" />
-                  <span>{submitting ? 'Sending Inquiry...' : 'Submit Inquiry'}</span>
+              <div className="mt-12 flex flex-col-reverse items-start justify-between gap-6 sm:flex-row sm:items-center" data-reveal>
+                <p className="max-w-xs text-[12px] leading-relaxed text-ash">Your details are used only to respond to this inquiry.</p>
+                <button type="submit" disabled={submitting} className="btn btn-ink h-16 px-10 disabled:opacity-60">
+                  {submitting ? 'Sending…' : 'Submit inquiry'}
+                  <ArrowUpRight className="h-4 w-4" />
                 </button>
               </div>
             </form>
           )}
-        </div>
-      </section>
-
-      {/* 3. Visit Our Office Section */}
-      <section className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12">
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <div className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] text-[#c59b67] mb-2">
-            HEADQUARTERS
-          </div>
-          <h2 className="font-serif-luxury text-3xl sm:text-5xl font-normal text-[#1a1918] tracking-tight mb-4">
-            Visit <span className="italic font-serif-luxury text-[#c59b67]">Our Office</span>
-          </h2>
-          <p className="text-xs sm:text-sm text-[#68625d] leading-relaxed font-light">
-            Step into our corporate office or schedule a preview at our ECR Experience Pavilion to discuss your residential aspirations.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          {/* Office Contact Info Card */}
-          <div className="bg-white rounded-[20px] p-8 border border-[#eae4db] shadow-sm space-y-6 text-left">
-            <h3 className="font-serif-luxury text-2xl font-bold text-[#1a1918]">
-              Chennai Corporate Office
-            </h3>
-
-            <div className="space-y-4 pt-2 text-xs sm:text-sm text-[#68625d]">
-              <div className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-[#c59b67] shrink-0 mt-0.5" />
-                <div>
-                  <strong className="text-[#1a1918] block mb-0.5">Address:</strong>
-                  <span>4/11, G R Mansion, 2nd Floor, Srinivasa Rd, T. Nagar, Chennai, Tamil Nadu 600017</span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Phone className="w-5 h-5 text-[#c59b67] shrink-0 mt-0.5" />
-                <div>
-                  <strong className="text-[#1a1918] block mb-0.5">Phone:</strong>
-                  <a href="tel:7358222445" className="hover:text-[#c59b67] font-mono text-[#1a1918]">
-                    +91 73582 22445
-                  </a>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Mail className="w-5 h-5 text-[#c59b67] shrink-0 mt-0.5" />
-                <div>
-                  <strong className="text-[#1a1918] block mb-0.5">Email:</strong>
-                  <a href="mailto:info@unifra.in" className="hover:text-[#c59b67] font-mono text-[#1a1918]">
-                    info@unifra.in
-                  </a>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Clock className="w-5 h-5 text-[#c59b67] shrink-0 mt-0.5" />
-                <div>
-                  <strong className="text-[#1a1918] block mb-0.5">Operating Hours:</strong>
-                  <span>Monday – Saturday: 9:30 AM – 6:30 PM</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ECR Experience Pavilion Card */}
-          <div className="bg-white rounded-[20px] p-8 border border-[#eae4db] shadow-sm space-y-6 text-left">
-            <h3 className="font-serif-luxury text-2xl font-bold text-[#1a1918]">
-              ECR Experience Pavilion
-            </h3>
-
-            <div className="space-y-4 pt-2 text-xs sm:text-sm text-[#68625d]">
-              <div className="flex items-start gap-3">
-                <Navigation className="w-5 h-5 text-[#c59b67] shrink-0 mt-0.5" />
-                <div>
-                  <strong className="text-[#1a1918] block mb-0.5">Site Location:</strong>
-                  <span>MYSA Enclave, 122 East Coast Road, Vettuvankeni, Chennai – 600115</span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Building className="w-5 h-5 text-[#c59b67] shrink-0 mt-0.5" />
-                <div>
-                  <strong className="text-[#1a1918] block mb-0.5">Experience Center:</strong>
-                  <span>Sample Villa Walkthrough, Material Library, 3D Virtual Flythrough</span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Clock className="w-5 h-5 text-[#c59b67] shrink-0 mt-0.5" />
-                <div>
-                  <strong className="text-[#1a1918] block mb-0.5">Site Visit Hours:</strong>
-                  <span>Daily: 10:00 AM – 6:00 PM (Prior Appointment Advised)</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Map / Directions Card */}
-          <div className="bg-[#f4f0eb] rounded-[20px] p-8 border border-[#e5ded4] shadow-sm space-y-5 text-left flex flex-col justify-between h-full">
-            <div>
-              <h3 className="font-serif-luxury text-2xl font-bold text-[#1a1918] mb-2">
-                Need Directions?
-              </h3>
-              <p className="text-xs sm:text-sm text-[#68625d] font-light leading-relaxed">
-                Our site team can arrange a chauffeur pick-up from Chennai International Airport or your residence for VIP site previews.
-              </p>
-            </div>
-
-            <div className="pt-4 border-t border-[#e5ded4]">
-              <a
-                href="https://maps.google.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full inline-flex items-center justify-center gap-2 py-3.5 px-4 rounded-sm bg-[#1a1918] hover:bg-[#2b2723] text-white text-xs font-mono uppercase tracking-wider transition-colors"
-              >
-                <span>Open in Google Maps</span>
-                <ExternalLink className="w-3.5 h-3.5 text-[#c59b67]" />
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   );
 };

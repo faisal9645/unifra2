@@ -1,25 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import confetti from 'canvas-confetti';
-import {
-  X,
-  Lock,
-  KeyRound,
-  CheckCircle2,
-  Shield,
-  ShieldCheck,
-  User,
-  Phone,
-  Mail,
-  MapPin,
-  Building,
-  ArrowRight,
-  Sparkles,
-  Clock,
-  Eye
-} from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { X, ArrowUpRight, Check } from 'lucide-react';
 import { ProjectItem } from '../types';
 import { saveLead } from '../utils/leadsStorage';
 import { validateVillaAccessInput } from '../utils/portfolioUtils';
+import { gsap, useGSAP, prefersReducedMotion } from '../lib/gsap';
+import { useLenis } from './SmoothScroll';
+import { MEDIA } from '../data/media';
+import { Img } from './ui';
 
 export interface ClientDetails {
   name: string;
@@ -39,6 +26,20 @@ interface VillaAccessModalProps {
   source?: string;
 }
 
+const CITIES = [
+  ['Chennai', 'Chennai (local resident)'],
+  ['Bengaluru', 'Bengaluru / Karnataka'],
+  ['Mumbai', 'Mumbai / Maharashtra'],
+  ['Hyderabad', 'Hyderabad / Telangana'],
+  ['Delhi-NCR', 'Delhi / NCR'],
+  ['NRI - UAE/Gulf', 'NRI — UAE / Middle East'],
+  ['NRI - USA/Canada', 'NRI — USA / Canada'],
+  ['NRI - Singapore/UK', 'NRI — Singapore / UK / Europe'],
+  ['Other', 'Other city / overseas']
+];
+
+const TIMELINES = ['Immediate (0 – 30 Days)', '1 – 3 Months', '3 – 6 Months', 'Exploring Options'];
+
 export const VillaAccessModal: React.FC<VillaAccessModalProps> = ({
   isOpen,
   onClose,
@@ -46,6 +47,8 @@ export const VillaAccessModal: React.FC<VillaAccessModalProps> = ({
   onSuccess,
   source = 'Villa Showcase Gate'
 }) => {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const { setLocked } = useLenis();
   const [formData, setFormData] = useState<ClientDetails>({
     name: '',
     phone: '',
@@ -55,31 +58,51 @@ export const VillaAccessModal: React.FC<VillaAccessModalProps> = ({
     interestedUnit: 'MYSA Luxe 4BHK Villa with Private Pool',
     notes: ''
   });
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGranted, setIsGranted] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Reset states on open
   useEffect(() => {
-    if (isOpen) {
-      setIsGranted(false);
-      setIsSubmitting(false);
-      setErrorMessage('');
-      // Pre-fill existing lead if saved in session
-      const savedName = sessionStorage.getItem('unifra_client_name') || '';
-      const savedPhone = sessionStorage.getItem('unifra_client_phone') || '';
-      const savedEmail = sessionStorage.getItem('unifra_client_email') || '';
-      if (savedName || savedPhone || savedEmail) {
-        setFormData(prev => ({
-          ...prev,
-          name: savedName || prev.name,
-          phone: savedPhone || prev.phone,
-          email: savedEmail || prev.email
-        }));
-      }
+    if (!isOpen) return;
+    setIsGranted(false);
+    setIsSubmitting(false);
+    setErrorMessage('');
+    const savedName = sessionStorage.getItem('unifra_client_name') || '';
+    const savedPhone = sessionStorage.getItem('unifra_client_phone') || '';
+    const savedEmail = sessionStorage.getItem('unifra_client_email') || '';
+    if (savedName || savedPhone || savedEmail) {
+      setFormData((prev) => ({
+        ...prev,
+        name: savedName || prev.name,
+        phone: savedPhone || prev.phone,
+        email: savedEmail || prev.email
+      }));
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setLocked(true);
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => {
+      setLocked(false);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [isOpen, onClose, setLocked]);
+
+  useGSAP(
+    () => {
+      if (!isOpen || !rootRef.current || prefersReducedMotion()) return;
+      gsap
+        .timeline()
+        .from(rootRef.current, { autoAlpha: 0, duration: 0.4 })
+        .fromTo('[data-gate-media]', { clipPath: 'inset(0% 100% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.3, ease: 'expo.inOut' }, 0)
+        .from('[data-gate-media] img', { scale: 1.3, duration: 1.8, ease: 'expo.out' }, 0.2)
+        .from('[data-gate-item]', { y: 28, autoAlpha: 0, stagger: 0.05, duration: 1, ease: 'expo.out' }, 0.4);
+    },
+    { dependencies: [isOpen], scope: rootRef }
+  );
 
   if (!isOpen) return null;
 
@@ -87,7 +110,6 @@ export const VillaAccessModal: React.FC<VillaAccessModalProps> = ({
     e.preventDefault();
     setErrorMessage('');
 
-    // Primary validation via shared portfolioUtils
     const validation = validateVillaAccessInput(formData.phone, formData.email);
     if (!validation.valid) {
       setErrorMessage(validation.error || 'Please provide valid contact details.');
@@ -95,10 +117,8 @@ export const VillaAccessModal: React.FC<VillaAccessModalProps> = ({
     }
 
     const clientName = formData.name.trim() || 'Valued Guest';
-
     setIsSubmitting(true);
 
-    // Save lead details to CRM Leads database & session
     try {
       saveLead({
         name: clientName,
@@ -111,284 +131,173 @@ export const VillaAccessModal: React.FC<VillaAccessModalProps> = ({
         notes: formData.notes
       });
     } catch {
-      // safe storage fallback
+      // storage unavailable — continue
     }
 
-    // Trigger luxury celebratory confetti
-    try {
-      confetti({
-        particleCount: 90,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#dfb776', '#c5a880', '#ffffff', '#e5c158']
-      });
-    } catch {
-      // safe fallback
-    }
+    // Loaded only on success, keeping it out of the initial bundle
+    import('canvas-confetti')
+      .then(({ default: confetti }) =>
+        confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 }, colors: ['#dfb776', '#a9814a', '#ffffff', '#0f0f0e'] })
+      )
+      .catch(() => {});
 
     setIsGranted(true);
     setIsSubmitting(false);
-
-    // After a brief delight transition, notify parent to unlock & navigate to villa page
-    setTimeout(() => {
-      onSuccess({
-        ...formData,
-        name: clientName
-      });
-    }, 1000);
+    setTimeout(() => onSuccess({ ...formData, name: clientName }), 1100);
   };
 
-  const activeProjectName = project ? project.name : 'MYSA Luxe Villas';
-  const activeLocation = project ? project.location : 'Vettuvankeni, ECR Chennai';
+  const projectName = project ? project.name : 'MYSA Luxe Villas';
+  const projectLocation = project ? project.location : 'Vettuvankeni, ECR Chennai';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#161513]/75 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl bg-[#faf7f2] rounded-sm shadow-2xl border border-[#e6dfd3] overflow-hidden text-[#161513]">
-        {/* Modal Header */}
-        <div className="bg-[#f2ece2] p-6 sm:p-7 flex items-start justify-between border-b border-[#e6dfd3] relative z-10">
-          <div className="text-left flex items-start gap-3.5 sm:gap-4">
-            <div className="w-11 h-11 rounded-sm border border-[#b88c52]/35 bg-[#faf7f2] p-1 flex items-center justify-center shrink-0">
-              <img
-                src="/images/unifra-emblem.png"
-                alt="Unifra Insignia"
-                className="w-full h-full object-contain"
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="inline-flex items-center gap-1.5 text-[#9c723b] text-[10px] font-mono uppercase tracking-[0.22em] font-semibold">
-                  <KeyRound className="w-3 h-3 text-[#b88c52]" />
-                  <span>EXCLUSIVE VILLA SHOWCASE ACCESS</span>
-                </span>
-              </div>
-              <h3 className="font-serif-luxury text-2xl sm:text-3xl font-normal text-[#161513]">
-                Unlock {activeProjectName}
-              </h3>
-              <p className="text-[#68625d] text-xs mt-1.5 font-light leading-relaxed max-w-md">
-                Submit your details to gain instant access to architectural floorplans, high-res galleries, unit availability, and pricing schedules.
-              </p>
-            </div>
+    <div ref={rootRef} className="fixed inset-0 z-[130] bg-paper text-ink" role="dialog" aria-modal="true" aria-label={`Unlock ${projectName}`}>
+      <div className="grid h-full lg:grid-cols-2">
+        <div data-gate-media className="relative hidden overflow-hidden bg-ink lg:block">
+          <Img media={MEDIA.entranceNight} alt="The illuminated MYSA lotus gate at night" sizes="50vw" className="img-cover" priority />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 p-12 text-paper">
+            <p className="meta text-paper/70">{projectLocation}</p>
+            <p className="mt-4 max-w-md font-display text-5xl leading-[1]">
+              A private dossier, <span className="serif-italic">opened for you.</span>
+            </p>
           </div>
-
-          <button
-            onClick={onClose}
-            className="p-2 rounded-sm border border-[#d8cebe] hover:border-[#1a1918] text-[#68625d] hover:text-[#1a1918] transition-colors cursor-pointer flex-shrink-0 ml-3"
-            aria-label="Close"
-          >
-            <X className="w-4 h-4" />
-          </button>
         </div>
 
-        {/* Modal Body */}
-        <div className="p-6 sm:p-7 max-h-[78vh] overflow-y-auto relative z-10">
-          {isGranted ? (
-            <div className="text-center py-10 space-y-4 animate-in fade-in zoom-in duration-300">
-              <div className="w-20 h-20 rounded-md bg-[#c59b67]/10 border border-[#c59b67]/40 p-2.5 flex items-center justify-center mx-auto shadow-md">
-                <img
-                  src="/images/unifra-emblem.png"
-                  alt="Unifra Insignia"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-[#c59b67] block mb-1">
-                  ACCESS GRANTED
-                </span>
-                <h4 className="font-serif-luxury text-2xl sm:text-3xl font-normal text-[#1a1918]">
-                  Welcome to {activeProjectName}
-                </h4>
-              </div>
-              <p className="text-xs sm:text-sm text-[#68625d] max-w-md mx-auto leading-relaxed font-light">
-                Your credentials have been verified. Opening the full architectural showcase and floorplans...
-              </p>
-              <div className="pt-2 flex items-center justify-center gap-2 text-xs font-mono text-[#9c723b]">
-                <CheckCircle2 className="w-4 h-4 text-[#b88c52]" />
-                <span>Redirecting to Villa Showcase...</span>
-              </div>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4 text-left">
-              {/* Project Preview Badge */}
-              <div className="p-3.5 rounded-sm bg-white border border-[#eae4db] flex items-center gap-3.5 shadow-xs">
-                <div className="w-12 h-12 rounded-sm overflow-hidden bg-[#eae5dc] flex-shrink-0 border border-[#eae4db]">
-                  <img
-                    src={project?.imageUrl || '/images/mysa3d/02A.jpg'}
-                    alt={activeProjectName}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-[#1a1918] text-xs font-semibold truncate font-serif-luxury">
-                    {activeProjectName}
-                  </div>
-                  <div className="text-[11px] text-[#c59b67] flex items-center gap-1 font-mono truncate">
-                    <MapPin className="w-3 h-3 shrink-0" />
-                    <span>{activeLocation}</span>
-                  </div>
-                  <div className="text-[10px] text-[#8c827a] font-light mt-0.5">
-                    4 & 5 BHK Swedish Coastal Villas • 3 of 6 Available
-                  </div>
-                </div>
-              </div>
+        <div className="flex h-full flex-col overflow-y-auto" data-lenis-prevent>
+          <div className="flex items-center justify-between px-6 py-5 sm:px-12">
+            <img src="/images/unifra-wordmark-gold.png" alt="Unifra" width={365} height={132} className="h-9 w-auto" />
+            <button
+              type="button"
+              onClick={onClose}
+              className="group flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-line-strong transition-colors hover:bg-ink hover:text-paper"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4 transition-transform duration-500 group-hover:rotate-90" />
+            </button>
+          </div>
 
-              {/* What You'll Unlock Pills */}
-              <div className="grid grid-cols-3 gap-2 py-1">
-                <div className="p-2 rounded-sm bg-white border border-[#eae4db] text-center">
-                  <div className="text-[9px] font-mono text-[#8c827a] uppercase tracking-wider">FLOORPLANS</div>
-                  <div className="text-[11px] text-[#1a1918] font-semibold mt-0.5">G + 2 Layouts</div>
-                </div>
-                <div className="p-2 rounded-sm bg-white border border-[#eae4db] text-center">
-                  <div className="text-[9px] font-mono text-[#8c827a] uppercase tracking-wider">PRICING</div>
-                  <div className="text-[11px] text-[#c59b67] font-semibold mt-0.5">On Request</div>
-                </div>
-                <div className="p-2 rounded-sm bg-white border border-[#eae4db] text-center">
-                  <div className="text-[9px] font-mono text-[#8c827a] uppercase tracking-wider">PROGRESS</div>
-                  <div className="text-[11px] text-[#1a1918] font-semibold mt-0.5">Live On-Site</div>
-                </div>
+          <div className="flex flex-1 flex-col justify-center px-6 pb-12 sm:px-12 lg:px-16">
+            {isGranted ? (
+              <div className="py-16 text-center">
+                <img src="/images/unifra-emblem-gold.png" alt="" className="mx-auto h-20 w-20 object-contain" />
+                <p className="meta mt-8 text-bronze-ink">Access granted</p>
+                <h3 className="mt-4 font-display text-5xl leading-none">Welcome to {projectName}</h3>
+                <p className="mx-auto mt-5 max-w-sm text-[15px] text-graphite">Opening floor plans, the complete photography archive and live construction status…</p>
               </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="mx-auto w-full max-w-xl" noValidate>
+                <p data-gate-item className="meta text-bronze-ink">
+                  Exclusive villa showcase
+                </p>
+                <h3 data-gate-item className="mt-4 font-display text-[clamp(2.6rem,4.2vw,4rem)] leading-[0.95]">
+                  Unlock {projectName}
+                </h3>
+                <p data-gate-item className="mt-5 text-[15px] leading-relaxed text-graphite">
+                  Share your phone and email for instant access to floor plans, high-resolution galleries, unit availability and pricing schedules.
+                </p>
 
-              {errorMessage && (
-                <div className="p-2.5 rounded-sm bg-red-50 border border-red-200 text-red-700 text-xs">
-                  {errorMessage}
-                </div>
-              )}
-
-              {/* Notice that Phone & Email are mainly required */}
-              <div className="p-3 rounded-sm bg-[#f4f0eb] border border-[#eae4db] flex items-start gap-2.5">
-                <ShieldCheck className="w-4 h-4 text-[#c59b67] shrink-0 mt-0.5" />
-                <div className="text-[11px] text-[#68625d] font-light leading-snug">
-                  <span className="font-semibold text-[#1a1918]">Direct Verification:</span> Enter your <span className="text-[#1a1918] font-semibold">Phone Number</span> and <span className="text-[#1a1918] font-semibold">Email Address</span> below to immediately unlock the villa page, architectural plans, and view stored records in <span className="font-mono text-[#c59b67]">/admin</span>.
-                </div>
-              </div>
-
-              {/* Primary Fields: Phone Number & Email Address (Mainly Required) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-mono tracking-widest uppercase text-[#1a1918] font-semibold flex items-center justify-between">
-                    <span className="flex items-center gap-1.5">
-                      <Phone className="w-3 h-3 text-[#c59b67]" />
-                      <span>PHONE NUMBER *</span>
-                    </span>
-                    <span className="text-[9px] text-[#8c827a] lowercase font-mono">required</span>
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    placeholder="+91 98765 43210"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-sm border border-[#d8cebe] focus:outline-none focus:border-[#1a1918] bg-white text-[#1a1918] text-xs font-mono placeholder:text-[#8c827a] transition-colors shadow-xs"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-mono tracking-widest uppercase text-[#1a1918] font-semibold flex items-center justify-between">
-                    <span className="flex items-center gap-1.5">
-                      <Mail className="w-3 h-3 text-[#c59b67]" />
-                      <span>EMAIL ADDRESS *</span>
-                    </span>
-                    <span className="text-[9px] text-[#8c827a] lowercase font-mono">required</span>
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    placeholder="name@domain.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-sm border border-[#d8cebe] focus:outline-none focus:border-[#1a1918] bg-white text-[#1a1918] text-xs placeholder:text-[#8c827a] transition-colors shadow-xs"
-                  />
-                </div>
-              </div>
-
-              {/* Secondary Fields: Name & City */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-mono tracking-widest uppercase text-[#68625d] flex items-center justify-between">
-                    <span className="flex items-center gap-1.5">
-                      <User className="w-3 h-3 text-[#8c827a]" />
-                      <span>FULL NAME</span>
-                    </span>
-                    <span className="text-[9px] text-[#8c827a] lowercase font-mono">optional</span>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="E.g. Siddharth Rao (Optional)"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-sm border border-[#d8cebe] focus:outline-none focus:border-[#1a1918] bg-white text-[#1a1918] text-xs placeholder:text-[#8c827a] transition-colors"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-mono tracking-widest uppercase text-[#68625d] flex items-center gap-1.5">
-                    <Building className="w-3 h-3 text-[#8c827a]" />
-                    <span>CURRENT CITY</span>
-                  </label>
-                  <select
-                    value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-sm border border-[#d8cebe] focus:outline-none focus:border-[#1a1918] bg-white text-[#1a1918] text-xs cursor-pointer transition-colors"
-                  >
-                    <option value="Chennai">Chennai (Local Resident)</option>
-                    <option value="Bengaluru">Bengaluru / Karnataka</option>
-                    <option value="Mumbai">Mumbai / Maharashtra</option>
-                    <option value="Hyderabad">Hyderabad / Telangana</option>
-                    <option value="Delhi-NCR">Delhi / NCR</option>
-                    <option value="NRI - UAE/Gulf">NRI (UAE / Dubai / Middle East)</option>
-                    <option value="NRI - USA/Canada">NRI (USA / Canada)</option>
-                    <option value="NRI - Singapore/UK">NRI (Singapore / UK / Europe)</option>
-                    <option value="Other">Other City / Overseas</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Timeline for Purchase */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-mono tracking-widest uppercase text-[#68625d] flex items-center gap-1.5">
-                  <Clock className="w-3 h-3 text-[#c59b67]" />
-                  <span>ESTIMATED PURCHASE TIMELINE</span>
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono">
+                <div data-gate-item className="mt-8 grid grid-cols-3 border-y border-line text-center">
                   {[
-                    'Immediate (0 – 30 Days)',
-                    '1 – 3 Months',
-                    '3 – 6 Months',
-                    'Exploring Options'
-                  ].map((option) => (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, timeline: option })}
-                      className={`p-2 rounded-sm border text-center transition-all cursor-pointer ${
-                        formData.timeline === option
-                          ? 'border-[#1a1918] bg-[#1a1918] text-white font-semibold'
-                          : 'border-[#eae4db] bg-white text-[#68625d] hover:text-[#1a1918] hover:border-[#d8cebe]'
-                      }`}
-                    >
-                      {option}
-                    </button>
+                    ['Floor plans', 'G + 2 layouts'],
+                    ['Pricing', 'On request'],
+                    ['Progress', 'Live on-site']
+                  ].map(([k, v], i) => (
+                    <div key={k} className={`py-4 ${i < 2 ? 'border-r border-line' : ''}`}>
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-ash">{k}</p>
+                      <p className="mt-1 text-[14px] font-medium">{v}</p>
+                    </div>
                   ))}
                 </div>
-              </div>
 
-              {/* Confidentiality Notice */}
-              <div className="pt-2 flex items-center gap-2 text-[11px] text-[#8c827a] font-light">
-                <Shield className="w-3.5 h-3.5 text-[#c59b67] shrink-0" />
-                <span>Your information remains strictly confidential with Unifra Private Client Advisory.</span>
-              </div>
+                {errorMessage && (
+                  <p className="mt-6 border-l-2 border-red-600 bg-red-50 px-4 py-3 text-[13px] text-red-700" role="alert">
+                    {errorMessage}
+                  </p>
+                )}
 
-              {/* Submit CTA */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full mt-2 py-4 rounded-sm bg-[#1a1918] hover:bg-[#2b2723] text-white text-xs font-mono uppercase tracking-[0.2em] font-semibold transition-all duration-300 shadow-md cursor-pointer flex items-center justify-center gap-2 group disabled:opacity-50"
-              >
-                <Eye className="w-4 h-4 text-[#c59b67]" />
-                <span>{isSubmitting ? 'VERIFYING DETAILS...' : 'UNLOCK & VIEW VILLA SHOWCASE'}</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform text-[#c59b67]" />
-              </button>
-            </form>
-          )}
+                <div className="mt-8 grid gap-x-8 gap-y-6 sm:grid-cols-2">
+                  <label data-gate-item className="block">
+                    <span className="text-[12px] font-medium">Phone number *</span>
+                    <input
+                      type="tel"
+                      required
+                      autoComplete="tel"
+                      placeholder="+91 98765 43210"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      className="field tabular-nums"
+                    />
+                  </label>
+                  <label data-gate-item className="block">
+                    <span className="text-[12px] font-medium">Email address *</span>
+                    <input
+                      type="email"
+                      required
+                      autoComplete="email"
+                      placeholder="name@domain.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="field"
+                    />
+                  </label>
+                  <label data-gate-item className="block">
+                    <span className="text-[12px] font-medium text-graphite">Full name</span>
+                    <input
+                      type="text"
+                      autoComplete="name"
+                      placeholder="Optional"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="field"
+                    />
+                  </label>
+                  <label data-gate-item className="block">
+                    <span className="text-[12px] font-medium text-graphite">Current city</span>
+                    <select value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value })} className="field">
+                      {CITIES.map(([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+
+                <fieldset data-gate-item className="mt-8">
+                  <legend className="text-[12px] font-medium text-graphite">Purchase timeline</legend>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {TIMELINES.map((option) => {
+                      const active = formData.timeline === option;
+                      return (
+                        <button
+                          key={option}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, timeline: option })}
+                          aria-pressed={active}
+                          className={`flex h-10 cursor-pointer items-center gap-2 rounded-full border px-4 text-[13px] transition-colors duration-300 ${
+                            active ? 'border-ink bg-ink text-paper' : 'border-line-strong text-graphite hover:border-ink hover:text-ink'
+                          }`}
+                        >
+                          {active && <Check className="h-3.5 w-3.5" />}
+                          {option}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </fieldset>
+
+                <div data-gate-item className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="max-w-[16rem] text-[12px] leading-relaxed text-ash">
+                    Your details stay strictly confidential with Unifra Private Client Advisory.
+                  </p>
+                  <button type="submit" disabled={isSubmitting} className="btn btn-ink disabled:opacity-60">
+                    {isSubmitting ? 'Verifying…' : 'Unlock the showcase'}
+                    <ArrowUpRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </div>

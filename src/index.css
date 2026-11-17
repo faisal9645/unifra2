@@ -1,112 +1,356 @@
 @import "tailwindcss";
 
+/* Large landscape screens only (desktop, iPad Pro landscape) — excludes portrait tablets */
+@custom-variant desk (@media (width >= 64rem) and (orientation: landscape));
+
+/* =============================================================================
+   UNIFRA — White Editorial Design System
+   Pure white canvas · ink typography · brand gold used sparingly
+   ============================================================================= */
+
+@theme {
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Instrument Serif", "Iowan Old Style", "Times New Roman", serif;
+
+  --color-paper: #ffffff;
+  --color-mist: #f7f6f3;
+  --color-stone: #eeebe5;
+  --color-ink: #0f0f0e;
+  --color-ink-soft: #2a2927;
+  --color-graphite: #57544f;
+  --color-ash: #8e8a84;
+  --color-line: #e7e4de;
+  --color-line-strong: #d3cec5;
+  --color-gold: #dfb776;
+  --color-bronze: #a9814a;
+  --color-bronze-ink: #85632f;
+
+  --text-mega: clamp(4.1rem, 14.6vw, 17rem);
+  --text-mega--line-height: 0.84;
+  --text-mega--letter-spacing: -0.035em;
+  --text-display: clamp(3rem, 8.4vw, 9.5rem);
+  --text-display--line-height: 0.9;
+  --text-display--letter-spacing: -0.03em;
+  --text-headline: clamp(2.4rem, 5.2vw, 5.6rem);
+  --text-headline--line-height: 0.98;
+  --text-headline--letter-spacing: -0.022em;
+  --text-statement: clamp(1.85rem, 3.7vw, 3.9rem);
+  --text-statement--line-height: 1.1;
+  --text-statement--letter-spacing: -0.015em;
+  --text-subhead: clamp(1.45rem, 2.3vw, 2.2rem);
+  --text-subhead--line-height: 1.15;
+  --text-subhead--letter-spacing: -0.01em;
+
+  --ease-luxe: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-curtain: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
 @layer base {
-  :root {
-    --font-serif: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
-    --font-display: 'Cinzel', serif;
-    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
-
-    --bg-canvas: #faf7f2;
-    --bg-surface: #f2ece2;
-    --bg-card: #ffffff;
-    --bg-obsidian: #151412;
-    --ink-primary: #161513;
-    --ink-secondary: #5a544e;
-    --ink-muted: #8a8278;
-    --accent-bronze: #b88c52;
-    --accent-bronze-light: #c59b67;
-    --border-hairline: #e5ddd0;
-  }
-
   html {
-    background-color: var(--bg-canvas);
-    color: var(--ink-primary);
-    scroll-behavior: auto !important;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    -webkit-text-size-adjust: 100%;
+    /* keep the gutter so locking scroll for overlays never shifts the layout */
+    scrollbar-gutter: stable;
   }
 
   body {
     font-family: var(--font-sans);
-    background-color: var(--bg-canvas);
-    color: var(--ink-primary);
+    background-color: var(--color-paper);
+    color: var(--color-ink);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
-  h1, h2, h3, .font-serif-luxury {
-    font-family: var(--font-serif);
+  ::selection {
+    background: var(--color-ink);
+    color: var(--color-paper);
   }
 
+  :focus-visible {
+    outline: 1.5px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+
+  /* Grid items may shrink below their content (stops scroll rows / long words widening a column) */
+  :where(.grid) > * {
+    min-width: 0;
+  }
+
+  /* Legacy aliases (admin portal & untouched legacy components) */
+  .font-serif-luxury,
   .font-display-luxury {
     font-family: var(--font-display);
   }
 }
 
-/* Refined Architectural Scrollbar */
+@layer components {
+  .shell {
+    width: 100%;
+    max-width: 1680px;
+    margin-inline: auto;
+    padding-inline: clamp(1.25rem, 4vw, 4.5rem);
+  }
+
+  /* Small uppercase marker used for section indexes & meta */
+  .meta {
+    font-size: 11px;
+    line-height: 1.4;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .serif-italic {
+    font-family: var(--font-display);
+    font-style: italic;
+  }
+
+  /* SplitText line masks: the clip box extends past the (tight) line box so
+     ascenders, descenders and italic overhangs are never sliced off */
+  .split-line-mask {
+    overflow: visible !important;
+    clip-path: inset(-0.42em -0.2em -0.34em -0.2em);
+  }
+
+  /* Text roll hover — two stacked copies slide on hover */
+  .roll {
+    display: inline-flex;
+    overflow: hidden;
+    vertical-align: top;
+    line-height: 1.25;
+    height: 1.25em;
+  }
+  .roll > span {
+    display: flex;
+    flex-direction: column;
+    /* keep the natural two-line height — a stretched flex item would only travel half a line */
+    align-self: flex-start;
+    flex-shrink: 0;
+    transition: transform 0.75s var(--ease-luxe);
+  }
+  .roll > span > span {
+    display: block;
+    height: 1.25em;
+    white-space: nowrap;
+  }
+  .group:hover .roll > span,
+  .roll:hover > span {
+    transform: translateY(-1.25em);
+  }
+
+  /* Underline that draws in from the left */
+  .u-draw {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.7s var(--ease-luxe);
+    padding-bottom: 2px;
+  }
+  .group:hover .u-draw,
+  .u-draw:hover {
+    background-size: 100% 1px;
+  }
+
+  /* Pill buttons with a fill that rises from below */
+  .btn {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    height: 3.5rem;
+    padding-inline: 1.75rem;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.6s var(--ease-luxe), border-color 0.6s var(--ease-luxe);
+  }
+  .btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    transform: translateY(101%);
+    transition: transform 0.7s var(--ease-luxe);
+  }
+  .btn:hover::before {
+    transform: translateY(0);
+  }
+  .btn-ink {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .btn-ink::before {
+    background: var(--color-bronze);
+  }
+  .btn-line {
+    border: 1px solid var(--color-line-strong);
+    color: var(--color-ink);
+  }
+  .btn-line::before {
+    background: var(--color-ink);
+  }
+  .btn-line:hover {
+    color: var(--color-paper);
+    border-color: var(--color-ink);
+  }
+  .btn-light {
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
+  .btn-light::before {
+    background: var(--color-gold);
+  }
+
+  .img-cover {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Oversized image for scroll parallax inside an overflow-hidden frame */
+  .parallax-img {
+    position: absolute;
+    left: 0;
+    top: -11%;
+    width: 100%;
+    height: 122%;
+    object-fit: cover;
+    will-change: transform;
+  }
+
+  /* Underline form fields */
+  .field {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--color-line-strong);
+    padding: 0.85rem 0;
+    font-size: 16px;
+    color: var(--color-ink);
+    border-radius: 0;
+    transition: border-color 0.4s var(--ease-luxe);
+    appearance: none;
+  }
+  .field::placeholder {
+    color: var(--color-ash);
+  }
+  .field:focus {
+    outline: none;
+    border-bottom-color: var(--color-ink);
+  }
+  select.field {
+    cursor: pointer;
+    background-image: linear-gradient(45deg, transparent 50%, var(--color-ink) 50%),
+      linear-gradient(135deg, var(--color-ink) 50%, transparent 50%);
+    background-position: calc(100% - 10px) 52%, calc(100% - 5px) 52%;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    padding-right: 1.5rem;
+  }
+
+  /* 3D hero tiles: --mw on phones, --w from tablet up */
+  .tunnel-card {
+    left: var(--mx);
+    top: var(--my);
+    width: var(--mw);
+  }
+  @media (min-width: 768px) and (orientation: landscape) {
+    .tunnel-card {
+      left: var(--x);
+      top: var(--y);
+      width: var(--w);
+    }
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Thin architectural scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f2ece2;
+  background: var(--color-paper);
 }
 ::-webkit-scrollbar-thumb {
-  background: #cdc3b4;
-  border-radius: 3px;
+  background: var(--color-line-strong);
+  border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #b88c52;
+  background: var(--color-ink);
 }
 
-/* Editorial Typographic Discipline */
-.balance-text {
-  text-wrap: balance;
-}
-
-.tabular-nums {
-  font-variant-numeric: tabular-nums;
-}
-
-/* Subtle Architectural Surface Utilities */
-.editorial-hairline {
-  border-color: #e5ddd0;
-}
-
-.bronze-gradient-text {
-  background: linear-gradient(135deg, #9a6f36 0%, #c59b67 52%, #855e2b 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Lenis Smooth Scrolling */
-html.lenis, html.lenis body {
+/* Lenis */
+html.lenis,
+html.lenis body {
   height: auto;
 }
-
 .lenis.lenis-smooth {
   scroll-behavior: auto !important;
 }
-
 .lenis.lenis-smooth [data-lenis-prevent] {
   overscroll-behavior: contain;
 }
-
 .lenis.lenis-stopped {
-  overflow: hidden;
+  overflow: clip;
 }
 
-.lenis.lenis-scrolling iframe {
-  pointer-events: none;
-}
-
-/* Mobile Drawer Height */
 .mobile-menu-overlay {
   height: 100vh;
   height: 100dvh;
 }
 
-/* Respect Reduced Motion Preferences */
+/* Hide the native cursor only once the GSAP cursor is live on fine pointers */
+html.has-cursor,
+html.has-cursor * {
+  cursor: none !important;
+}
+html.has-cursor input,
+html.has-cursor textarea {
+  cursor: text !important;
+}
+
+@keyframes drift {
+  0% {
+    transform: translate3d(-4%, -3%, 0) rotate(0deg) scale(1);
+  }
+  100% {
+    transform: translate3d(4%, 3%, 0) rotate(8deg) scale(1.08);
+  }
+}
+
+@keyframes scrollcue {
+  0% {
+    transform: translateY(-100%);
+  }
+  65%,
+  100% {
+    transform: translateY(210%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

@@ -1,264 +1,207 @@
-import React from 'react';
-import { ArrowRight, Compass, Award, Hammer, CheckCircle2, Home } from 'lucide-react';
-import { CoreValues } from '../CoreValues';
+import React, { useRef, useState } from 'react';
+import { ArrowUpRight } from 'lucide-react';
+import { CORE_VALUES } from '../../data/mockData';
+import { MEDIA } from '../../data/media';
+import { Img } from '../ui';
+import { gsap, useGSAP, prefersReducedMotion } from '../../lib/gsap';
+import { useScrollFx } from '../../hooks/useScrollFx';
 
 interface AboutStoryPageProps {
   onNavigateTeam: () => void;
-  onNavigateContact?: () => void;
-  onNavigateProjects?: () => void;
-  onOpenContact?: () => void;
+  onNavigateProjects: () => void;
 }
 
-export const AboutStoryPage: React.FC<AboutStoryPageProps> = ({
-  onNavigateTeam,
-  onNavigateContact,
-  onOpenContact
-}) => {
-  const milestones = [
-    {
-      year: '2022',
-      title: 'A Vision for Chennai',
-      desc: 'Unifra was founded with a clear mission: to craft coastal residences in Chennai uniting Scandinavian architectural calm, natural materials, and enduring build quality.'
-    },
-    {
-      year: '2023',
-      title: 'Bringing MYSA to Life',
-      desc: 'Construction began on MYSA Luxe Villas in Vettuvankeni, ECR — defined by asymmetrical butterfly roofs, deep stone cantilevers, and rigorous structural tolerances.'
-    },
-    {
-      year: '2024–2026',
-      title: 'A Legacy of Trust',
-      desc: 'Following landmark structural milestones and private family reservations at MYSA, Unifra expanded its architectural pipeline across Chennai’s premier coastal enclaves.'
-    }
-  ];
+const MILESTONES = [
+  {
+    year: '2022',
+    title: 'A vision for Chennai',
+    desc: 'Unifra was founded with a clear mission: to craft coastal residences in Chennai uniting Scandinavian architectural calm, natural materials, and enduring build quality.',
+    media: MEDIA.coast,
+    clip: 'left'
+  },
+  {
+    year: '2023',
+    title: 'Bringing MYSA to life',
+    desc: 'Construction began on MYSA Luxe Villas in Vettuvankeni, ECR — defined by asymmetrical butterfly roofs, deep stone cantilevers, and rigorous structural tolerances.',
+    media: MEDIA.panorama,
+    clip: 'up'
+  },
+  {
+    year: '2024—26',
+    title: 'A legacy of trust',
+    desc: 'Following landmark structural milestones and private family reservations at MYSA, Unifra expanded its architectural pipeline across Chennai’s premier coastal enclaves.',
+    media: MEDIA.twilight,
+    clip: 'right'
+  }
+];
 
-  const capabilities = [
-    {
-      icon: Compass,
-      title: 'Bespoke Architecture',
-      tag: 'Personalized · Contextual',
-      desc: 'Site-specific architectural solutions calibrated for coastal light, sea breezes, and private family living.'
+const MISSION = [
+  'Bespoke architectural customization tailored to your family',
+  'Spaces calibrated for daylight, airflow, and acoustic calm',
+  'Clear independent land titles and milestone transparency'
+];
+
+export const AboutStoryPage: React.FC<AboutStoryPageProps> = ({ onNavigateTeam, onNavigateProjects }) => {
+  const pageRef = useRef<HTMLDivElement>(null);
+  const [activeValue, setActiveValue] = useState(0);
+
+  // The emblem turns with the scroll
+  useGSAP(
+    () => {
+      if (prefersReducedMotion()) return;
+      gsap.to('[data-emblem]', {
+        rotation: 180,
+        ease: 'none',
+        scrollTrigger: { trigger: '[data-emblem]', start: 'top 80%', end: '+=900', scrub: true }
+      });
     },
-    {
-      icon: Home,
-      title: 'Innovative Engineering',
-      tag: 'Biophilic · Smart-Ready',
-      desc: 'Passive thermal comfort, acoustic glazing, and discreet smart-home orchestration woven seamlessly into each home.'
-    },
-    {
-      icon: Hammer,
-      title: 'Timeless Materiality',
-      tag: 'Stone · Timber · Brass',
-      desc: 'Honed natural stone, seasoned Burmese teak, and weathered brass details chosen to age gracefully over decades.'
-    },
-    {
-      icon: Award,
-      title: 'Turnkey Delivery',
-      tag: 'Concept to Handover',
-      desc: 'Single-point accountability from architectural conception and structural execution to bespoke interior completion.'
-    }
-  ];
+    { scope: pageRef }
+  );
+
+  useScrollFx(pageRef);
 
   return (
-    <div className="pt-24 sm:pt-28 pb-16 bg-[#faf7f2] text-[#161513]">
-      {/* Hero Banner */}
-      <section className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12 mb-16">
-        <div className="bg-[#f2ece2] rounded-[24px] p-8 sm:p-14 lg:p-16 border border-[#e5ddd0] grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-          <div className="lg:col-span-7 space-y-6 text-left">
-            <div className="flex items-center gap-2.5 text-[11px] font-mono uppercase tracking-[0.26em] text-[#9a6f36]">
-              <span>The Unifra Heritage</span>
-              <span aria-hidden="true">·</span>
-              <span>Creating Desires</span>
-            </div>
-
-            <h1 className="font-serif-luxury text-4xl sm:text-6xl lg:text-7xl font-normal tracking-tight text-[#161513] leading-[1.06]">
-              About <span className="italic text-[#b88c52]">Unifra.</span>
-            </h1>
-
-            <p className="text-sm sm:text-base lg:text-lg text-[#5a544e] font-light leading-relaxed max-w-xl">
-              Dreams are meant to come true. At Unifra Properties, considered craftsmanship, architectural restraint, and transparent stewardship converge to create remarkable residences that endure.
-            </p>
-
-            <div className="pt-2 flex flex-wrap items-center gap-6 text-xs font-mono text-[#7c746b] tabular-nums">
-              <div><strong className="text-[#161513] text-base font-serif-luxury font-normal block">2022</strong> Founded in Chennai</div>
-              <div className="w-px h-7 bg-[#dfd5c5]" />
-              <div><strong className="text-[#161513] text-base font-serif-luxury font-normal block">06 Villas</strong> MYSA Enclave</div>
-              <div className="w-px h-7 bg-[#dfd5c5]" />
-              <div><strong className="text-[#161513] text-base font-serif-luxury font-normal block">100%</strong> Independent Titles</div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-5">
-            <div className="relative rounded-t-[160px] rounded-b-[16px] overflow-hidden border border-[#dfd5c5] shadow-md h-[340px] sm:h-[420px] bg-[#e6dfd3]">
-              <img
-                src="/images/mysa3d/mysa.jpg"
-                alt="MYSA Luxe Villas Twilight Elevation"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute bottom-4 left-5 right-5 p-3.5 bg-[#faf7f2]/95 backdrop-blur-md rounded-sm border border-[#e5ddd0] text-center">
-                <span className="text-[10px] font-mono tracking-[0.2em] text-[#161513] uppercase block font-medium">
-                  Flagship Enclave · Vettuvankeni ECR
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div ref={pageRef} className="bg-paper text-ink">
+      {/* Hero */}
+      <section className="shell pb-28 pt-36 sm:pt-48">
+        <p className="meta text-center text-graphite" data-reveal="load">
+          Our story — Unifra Properties, Chennai
+        </p>
+        <h1 className="mt-12 flex flex-col items-center justify-center gap-4 text-center font-display text-display lg:flex-row lg:gap-[3vw]">
+          <span data-split="load" data-split-by="chars">
+            Creating
+          </span>
+          <img data-emblem src="/images/unifra-emblem-gold.png" alt="" className="h-[0.8em] w-[0.8em] object-contain" />
+          <span className="serif-italic" data-split="load" data-split-by="chars" data-delay="0.2">
+            desires.
+          </span>
+        </h1>
+        <p className="mx-auto mt-16 max-w-3xl text-center font-display text-subhead" data-reveal="load" data-delay="0.4">
+          Dreams are meant to come true.
+        </p>
       </section>
 
-      {/* Chronicle Milestones */}
-      <section className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12 mb-20">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="text-[11px] font-mono uppercase tracking-[0.26em] text-[#9a6f36] mb-2 block">
-            Chronicle
-          </span>
-          <h2 className="font-serif-luxury text-3xl sm:text-5xl font-normal text-[#161513] tracking-tight mb-3">
-            Our <span className="italic text-[#b88c52]">Journey</span>
+      {/* Chronicle */}
+      <section className="shell pb-32">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+          <h2 className="font-display text-headline" data-split>
+            The chronicle
           </h2>
-          <p className="text-xs sm:text-sm text-[#5a544e] font-light">
+          <p className="max-w-xs text-[15px] text-graphite" data-reveal>
             Building enduring sanctuaries along Chennai’s East Coast Road.
           </p>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {milestones.map((m) => (
-            <div
-              key={m.year}
-              className="bg-white rounded-[16px] p-8 border border-[#e5ddd0] hover:border-[#b88c52] transition-colors shadow-sm"
-            >
-              <div className="text-xs font-mono font-semibold uppercase tracking-[0.2em] text-[#9a6f36] mb-3 tabular-nums">
-                {m.year} · {m.title}
-              </div>
-              <p className="text-xs sm:text-sm text-[#5a544e] leading-relaxed font-light">
+        {MILESTONES.map((m) => (
+          <article key={m.year} className="grid gap-8 border-t border-line py-14 lg:grid-cols-12 lg:py-20">
+            <div className="lg:col-span-5">
+              <p className="font-display text-[clamp(3.6rem,7.4vw,8rem)] leading-[0.9] tracking-[-0.04em] lg:sticky lg:top-32">{m.year}</p>
+            </div>
+            <div className="lg:col-span-3">
+              <h3 className="font-display text-[2.2rem] leading-[1.05]" data-split>
+                {m.title}
+              </h3>
+              <p className="mt-5 text-[15px] leading-relaxed text-graphite" data-reveal>
                 {m.desc}
               </p>
             </div>
-          ))}
-        </div>
+            <div className="relative aspect-[4/5] overflow-hidden bg-stone lg:col-span-4" data-clip={m.clip}>
+              <Img media={m.media} alt={m.title} sizes="(min-width: 1024px) 30vw, 100vw" className="img-cover" />
+            </div>
+          </article>
+        ))}
       </section>
 
-      {/* Core Values */}
-      <CoreValues />
-
-      {/* Mission & Vision */}
-      <section className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12 my-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center bg-[#f2ece2] rounded-[24px] p-8 sm:p-12 border border-[#e5ddd0]">
-          <div className="space-y-4 text-left">
-            <span className="text-[11px] font-mono uppercase tracking-[0.22em] text-[#9a6f36] font-semibold">
-              Core Purpose
-            </span>
-            <h2 className="font-serif-luxury text-3xl sm:text-4xl font-normal text-[#161513]">
-              Our Mission
-            </h2>
-            <p className="text-xs sm:text-sm text-[#5a544e] leading-relaxed font-light">
-              We craft extraordinary homes that surpass expectations through thoughtful architecture, natural materials, and transparent execution.
+      {/* Values — expanding panels */}
+      <section className="bg-stone py-28 sm:py-36">
+        <div className="shell">
+          <div className="mb-14 grid gap-6 lg:grid-cols-12">
+            <p className="meta text-graphite lg:col-span-4" data-reveal>
+              Foundational pillars
             </p>
-            <div className="pt-2 space-y-2.5">
-              {[
-                'Bespoke architectural customization tailored to your family',
-                'Spaces calibrated for daylight, airflow, and acoustic calm',
-                'Clear independent land titles and milestone transparency'
-              ].map((item) => (
-                <div key={item} className="flex items-center gap-3 text-xs sm:text-sm text-[#161513]">
-                  <CheckCircle2 className="w-4 h-4 text-[#b88c52] shrink-0" />
-                  <span>{item}</span>
+            <h2 className="font-display text-headline lg:col-span-8" data-split>
+              The principles behind every <span className="serif-italic">family we build for.</span>
+            </h2>
+          </div>
+          <div className="flex flex-col gap-px bg-line-strong lg:h-[480px] lg:flex-row">
+            {CORE_VALUES.map((value, i) => {
+              const open = activeValue === i;
+              return (
+                <div
+                  key={value.id}
+                  tabIndex={0}
+                  onMouseEnter={() => setActiveValue(i)}
+                  onFocus={() => setActiveValue(i)}
+                  className={`flex flex-col justify-between gap-10 bg-stone p-8 outline-none transition-[flex-grow] duration-[900ms] ease-luxe sm:p-10 ${
+                    open ? 'lg:flex-[2.4]' : 'lg:flex-1'
+                  }`}
+                >
+                  <span className="font-display text-6xl italic text-bronze">{String(i + 1).padStart(2, '0')}</span>
+                  <div>
+                    <h3 className="font-display text-[clamp(2rem,2.8vw,2.9rem)] leading-[1]">{value.title}</h3>
+                    <p
+                      className={`mt-5 max-w-md text-[15px] leading-relaxed text-graphite transition-opacity duration-700 ${
+                        open ? 'lg:opacity-100' : 'lg:opacity-0'
+                      }`}
+                    >
+                      {value.description}
+                    </p>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-4 text-left">
-            <span className="text-[11px] font-mono uppercase tracking-[0.22em] text-[#9a6f36] font-semibold">
-              Our Vision
-            </span>
-            <h2 className="font-serif-luxury text-3xl sm:text-4xl font-normal text-[#161513]">
-              Where We’re Headed
-            </h2>
-            <p className="text-xs sm:text-sm text-[#5a544e] leading-relaxed font-light">
-              To stand as South India’s benchmark for quiet coastal luxury — uniting Scandinavian spatial clarity with warm local craft.
-            </p>
-            <div className="rounded-[12px] overflow-hidden border border-[#dfd5c5] h-56 sm:h-64 bg-[#e6dfd3]">
-              <img
-                src="/images/mysa3d/KITCHEN.jpg"
-                alt="MYSA Minimalist Culinary Studio"
-                className="w-full h-full object-cover"
-              />
-            </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* Capabilities */}
-      <section className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12 mb-16">
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <span className="text-[11px] font-mono uppercase tracking-[0.26em] text-[#9a6f36] mb-2 block">
-            Capabilities
+      {/* Mission & vision */}
+      <section className="shell grid gap-20 py-32 sm:py-40 lg:grid-cols-12 lg:gap-8">
+        <div className="lg:col-span-5">
+          <p className="meta text-graphite" data-reveal>
+            Mission
+          </p>
+          <p className="mt-6 font-display text-subhead" data-reveal>
+            We craft extraordinary homes that surpass expectations through thoughtful architecture, natural materials and transparent execution.
+          </p>
+          <ol className="mt-12 border-t border-line" data-stagger>
+            {MISSION.map((item, i) => (
+              <li key={item} className="flex gap-6 border-b border-line py-5 text-[15px]">
+                <span className="tabular-nums text-ash">{String(i + 1).padStart(2, '0')}</span>
+                {item}
+              </li>
+            ))}
+          </ol>
+        </div>
+        <div className="lg:col-span-6 lg:col-start-7">
+          <p className="meta text-graphite" data-reveal>
+            Vision
+          </p>
+          <p className="mt-6 font-display text-statement" data-split data-split-by="words">
+            To stand as South India’s benchmark for quiet coastal luxury — uniting Scandinavian spatial clarity with{' '}
+            <span className="serif-italic text-bronze">warm local craft.</span>
+          </p>
+          <button type="button" onClick={onNavigateProjects} className="group mt-12 flex cursor-pointer items-center gap-3 text-[14px] font-medium" data-reveal>
+            <span className="u-draw">See the residences</span>
+            <ArrowUpRight className="h-4 w-4" />
+          </button>
+        </div>
+      </section>
+
+      {/* People */}
+      <section className="shell pb-32 text-center">
+        <button type="button" onClick={onNavigateTeam} data-cursor="Meet" className="group mx-auto block cursor-pointer" data-reveal>
+          <span className="flex justify-center -space-x-5">
+            {['/images/team/siddiq-ahmed.png', '/images/team/nikesh-rajan.png'].map((src) => (
+              <img key={src} src={src} alt="" className="h-24 w-24 rounded-full object-cover ring-4 ring-paper sm:h-28 sm:w-28" />
+            ))}
           </span>
-          <h2 className="font-serif-luxury text-3xl sm:text-5xl font-normal text-[#161513] tracking-tight mb-3">
-            Array of <span className="italic text-[#b88c52]">Disciplines</span>
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {capabilities.map((cap) => (
-            <div
-              key={cap.title}
-              className="bg-white rounded-[16px] p-6 border border-[#e5ddd0] hover:border-[#b88c52] transition-colors flex flex-col justify-between shadow-sm"
-            >
-              <div>
-                <div className="w-10 h-10 rounded-full bg-[#f2ece2] border border-[#dfd5c5] flex items-center justify-center text-[#b88c52] mb-4">
-                  <cap.icon className="w-5 h-5" />
-                </div>
-                <h3 className="font-serif-luxury text-xl font-normal text-[#161513] mb-2">
-                  {cap.title}
-                </h3>
-                <p className="text-xs text-[#5a544e] leading-relaxed font-light">
-                  {cap.desc}
-                </p>
-              </div>
-              <span className="text-[10px] font-mono text-[#9a6f36] uppercase tracking-wider mt-4 pt-3 border-t border-[#f2ece2]">
-                {cap.tag}
-              </span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Meet Our Team CTA */}
-      <section className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12">
-        <div className="rounded-[24px] p-8 sm:p-14 bg-[#161513] text-[#faf7f2] flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="max-w-2xl text-center md:text-left">
-            <span className="text-[11px] font-mono uppercase tracking-[0.24em] text-[#c59b67] mb-2 block">
-              The People Behind Unifra
-            </span>
-            <h3 className="font-serif-luxury text-2xl sm:text-4xl font-normal mb-2">
-              Meet Our Leadership Team
-            </h3>
-            <p className="text-xs sm:text-sm text-[#cfc7bc] font-light leading-relaxed">
-              Discover the founders and master builders guiding every architectural milestone.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <button
-              type="button"
-              onClick={onNavigateTeam}
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-sm bg-[#faf7f2] hover:bg-[#e8e0d4] text-[#161513] font-medium text-xs font-mono uppercase tracking-wider transition-colors cursor-pointer"
-            >
-              <span>View Our Team</span>
-              <ArrowRight className="w-3.5 h-3.5 text-[#9a6f36]" />
-            </button>
-            {(onNavigateContact || onOpenContact) && (
-              <button
-                type="button"
-                onClick={onNavigateContact || onOpenContact}
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-sm border border-white/25 hover:border-[#c59b67] text-[#faf7f2] text-xs font-mono uppercase tracking-wider transition-colors cursor-pointer"
-              >
-                <span>Inquire</span>
-              </button>
-            )}
-          </div>
-        </div>
+          <span className="mt-8 block font-display text-headline">
+            The people behind <span className="serif-italic">Unifra</span>
+          </span>
+          <span className="mt-6 inline-flex items-center gap-2 text-[14px] font-medium">
+            <span className="u-draw">Meet the leadership</span>
+            <ArrowUpRight className="h-4 w-4" />
+          </span>
+        </button>
       </section>
     </div>
   );
