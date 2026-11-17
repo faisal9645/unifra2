@@ -6,12 +6,31 @@
     --font-display: 'Cinzel', serif;
     --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
+
+    --bg-canvas: #faf7f2;
+    --bg-surface: #f2ece2;
+    --bg-card: #ffffff;
+    --bg-obsidian: #151412;
+    --ink-primary: #161513;
+    --ink-secondary: #5a544e;
+    --ink-muted: #8a8278;
+    --accent-bronze: #b88c52;
+    --accent-bronze-light: #c59b67;
+    --border-hairline: #e5ddd0;
+  }
+
+  html {
+    background-color: var(--bg-canvas);
+    color: var(--ink-primary);
+    scroll-behavior: auto !important;
   }
 
   body {
     font-family: var(--font-sans);
-    background-color: #0b0c0e;
-    color: #f3f4f6;
+    background-color: var(--bg-canvas);
+    color: var(--ink-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, .font-serif-luxury {
@@ -23,55 +42,42 @@
   }
 }
 
-/* Custom dark luxury scrollbar */
+/* Refined Architectural Scrollbar */
 ::-webkit-scrollbar {
-  width: 7px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0b0c0e;
+  background: #f2ece2;
 }
 ::-webkit-scrollbar-thumb {
-  background: #242730;
-  border-radius: 2px;
+  background: #cdc3b4;
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #c5a880;
+  background: #b88c52;
 }
 
-/* Glassmorphism utilities for dark luxury obsidian theme */
-.glass-panel {
-  background: rgba(18, 20, 24, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+/* Editorial Typographic Discipline */
+.balance-text {
+  text-wrap: balance;
 }
 
-.glass-dark {
-  background: rgba(11, 12, 14, 0.88);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
-.gold-shimmer {
-  background: linear-gradient(135deg, #dfc08f 0%, #b89355 50%, #e2c79b 100%);
+/* Subtle Architectural Surface Utilities */
+.editorial-hairline {
+  border-color: #e5ddd0;
 }
 
-.gold-border {
-  border-color: rgba(197, 168, 128, 0.3);
-}
-
-.gold-text-gradient {
-  background: linear-gradient(135deg, #ffffff 0%, #dfb776 50%, #c5a880 100%);
+.bronze-gradient-text {
+  background: linear-gradient(135deg, #9a6f36 0%, #c59b67 52%, #855e2b 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/* Lenis smooth scrolling rules & GPU hardware acceleration */
-html {
-  scroll-behavior: auto !important;
-}
-
+/* Lenis Smooth Scrolling */
 html.lenis, html.lenis body {
   height: auto;
 }
@@ -92,402 +98,18 @@ html.lenis, html.lenis body {
   pointer-events: none;
 }
 
-/* GPU hardware acceleration for smooth 60fps scrolling */
-canvas, video, img, .glass-panel, .glass-dark {
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  will-change: transform;
-}
-
-/* Global antialiasing */
-* {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* ==========================================================================
-   LIGHT MODE (DAY THEME) ARCHITECTURAL STYLING
-   ========================================================================== */
-
-body.theme-light {
-  background-color: #f8f9fb;
-  color: #121418;
-}
-
-body.theme-light ::-webkit-scrollbar {
-  width: 7px;
-}
-body.theme-light ::-webkit-scrollbar-track {
-  background: #f0f2f5;
-}
-body.theme-light ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 2px;
-}
-body.theme-light ::-webkit-scrollbar-thumb:hover {
-  background: #b88939;
-}
-
-/* Surface backgrounds for light mode */
-body.theme-light,
-body.theme-light #root,
-body.theme-light main,
-body.theme-light .bg-\[\#0b0c0e\],
-body.theme-light section.bg-\[\#0b0c0e\],
-body.theme-light div.bg-\[\#0b0c0e\],
-body.theme-light footer.bg-\[\#07080a\],
-body.theme-light .bg-\[\#07080a\],
-body.theme-light .bg-\[\#08090c\],
-body.theme-light section.bg-\[\#08090c\],
-body.theme-light .bg-\[\#090a0d\],
-body.theme-light .bg-\[\#050608\],
-body.theme-light .bg-\[\#0a0b0e\] {
-  background-color: #f8f9fb !important;
-}
-
-body.theme-light .bg-\[\#0e1014\],
-body.theme-light .bg-\[\#121418\],
-body.theme-light .bg-\[\#12141a\],
-body.theme-light .bg-\[\#181a20\],
-body.theme-light .bg-\[\#15171d\],
-body.theme-light .bg-\[\#0f1115\] {
-  background-color: #ffffff !important;
-}
-
-body.theme-light .bg-\[\#14161b\],
-body.theme-light .bg-\[\#1a1d24\],
-body.theme-light .bg-\[\#1e222b\],
-body.theme-light .bg-white\/\[0\.02\],
-body.theme-light .bg-white\/\[0\.03\],
-body.theme-light .bg-white\/\[0\.04\],
-body.theme-light .bg-white\/\[0\.05\],
-body.theme-light .bg-white\/\[0\.06\],
-body.theme-light .bg-white\/\[0\.08\] {
-  background-color: #f1f5f9 !important;
-}
-
-/* Surface gradient overrides for non-photo elements */
-body.theme-light main .from-\[\#0b0c0e\]:not(:has(img)),
-body.theme-light main .from-\[\#07080a\]:not(:has(img)),
-body.theme-light main .from-\[\#08090c\]:not(:has(img)) {
-  --tw-gradient-from: #f8f9fb var(--tw-gradient-from-position) !important;
-}
-body.theme-light main .to-\[\#0b0c0e\]:not(:has(img)),
-body.theme-light main .to-\[\#07080a\]:not(:has(img)),
-body.theme-light main .to-\[\#08090c\]:not(:has(img)) {
-  --tw-gradient-to: #f8f9fb var(--tw-gradient-to-position) !important;
-}
-body.theme-light main .via-\[\#0b0c0e\]:not(:has(img)),
-body.theme-light main .via-\[\#07080a\]:not(:has(img)),
-body.theme-light main .via-\[\#08090c\]:not(:has(img)) {
-  --tw-gradient-via: #f8f9fb var(--tw-gradient-via-position) !important;
-}
-
-/* Ensure images remain crisp, high contrast, and sharp in Light Mode.
-   Preserves Tailwind blur utilities (e.g. blurred upcoming-project cards):
-   --tw-blur is empty unless a blur-* class sets it, so normal images are unaffected. */
-body.theme-light img {
-  filter: var(--tw-blur,) contrast(1.03) brightness(1.02);
-}
-
-/* Text color overrides */
-body.theme-light .text-\[\#f3f4f6\],
-body.theme-light .text-white {
-  color: #121418 !important;
-}
-
-body.theme-light .text-gray-100,
-body.theme-light .text-gray-200,
-body.theme-light .text-gray-300 {
-  color: #2d3748 !important;
-}
-
-body.theme-light .text-gray-400 {
-  color: #4a5568 !important;
-}
-
-body.theme-light .text-gray-500 {
-  color: #64748b !important;
-}
-
-/* Border overrides */
-body.theme-light .border-white\/5,
-body.theme-light .border-white\/10,
-body.theme-light .border-white\/15,
-body.theme-light .border-white\/20,
-body.theme-light .border-white\/30 {
-  border-color: rgba(0, 0, 0, 0.1) !important;
-}
-
-body.theme-light .divide-white\/5 > * + *,
-body.theme-light .divide-white\/10 > * + * {
-  border-color: rgba(0, 0, 0, 0.1) !important;
-}
-
-/* Form inputs & select dropdowns in Light Mode */
-body.theme-light input[type="text"],
-body.theme-light input[type="email"],
-body.theme-light input[type="tel"],
-body.theme-light input[type="search"],
-body.theme-light textarea,
-body.theme-light select {
-  background-color: #ffffff !important;
-  color: #121418 !important;
-  border-color: rgba(0, 0, 0, 0.18) !important;
-}
-
-body.theme-light select option {
-  background-color: #ffffff !important;
-  color: #121418 !important;
-}
-
-select option {
-  background-color: #121418;
-  color: #f3f4f6;
-}
-
-body.theme-light input::placeholder,
-body.theme-light textarea::placeholder {
-  color: #94a3b8 !important;
-}
-
-/* Glassmorphism overrides */
-body.theme-light .glass-panel {
-  background: rgba(255, 255, 255, 0.94) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-  color: #121418 !important;
-}
-
-body.theme-light .glass-dark {
-  background: rgba(255, 255, 255, 0.97) !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-  color: #121418 !important;
-}
-
-/* Solid gold buttons high contrast in both themes */
-button.bg-\[\#dfb776\],
-a.bg-\[\#dfb776\],
-.bg-\[\#dfb776\] {
-  background-color: #dfb776 !important;
-  color: #0b0c0e !important;
-}
-
-button.bg-\[\#dfb776\] *,
-a.bg-\[\#dfb776\] *,
-.bg-\[\#dfb776\] * {
-  color: #0b0c0e !important;
-}
-
-/* Secondary outline buttons in Light Mode */
-body.theme-light button.border-white\/15,
-body.theme-light button.border-white\/20,
-body.theme-light button.border-white\/25,
-body.theme-light a.border-white\/15,
-body.theme-light a.border-white\/20 {
-  border-color: rgba(0, 0, 0, 0.2) !important;
-  color: #121418 !important;
-}
-
-body.theme-light button.border-white\/15 *,
-body.theme-light button.border-white\/20 *,
-body.theme-light button.border-white\/25 *,
-body.theme-light a.border-white\/15 * {
-  color: #121418 !important;
-}
-
-/* Gold text override in Light Mode (except inside solid gold buttons or dark cards) */
-body.theme-light .text-\[\#dfb776\]:not(.bg-\[\#dfb776\]):not(.bg-\[\#dfb776\] *):not(.dark-overlay-card *):not([data-dark-card] *):not(button.bg-black *):not(.bg-black\/60 *):not(.bg-black\/70 *) {
-  color: #9b6f1e !important;
-}
-
-body.theme-light .gold-text-gradient {
-  background: linear-gradient(135deg, #121418 0%, #b88939 50%, #8a6218 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-body.theme-light .border-\[\#dfb776\] {
-  border-color: #dfb776 !important;
-}
-
-/* Modal and floating dropdown shadows in light mode */
-body.theme-light .shadow-2xl {
-  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.12), 0 10px 20px -5px rgba(0, 0, 0, 0.06) !important;
-}
-
-body.theme-light .shadow-xl {
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* ==========================================================================
-   PRESERVE TEXT CONTRAST ON DARK PHOTO OVERLAYS & HERO BANNERS IN LIGHT MODE
-   ========================================================================== */
-
-/* Ensure clean, crisp typography without dark text shadows in Day Mode */
-body.theme-light h1,
-body.theme-light h2,
-body.theme-light h3,
-body.theme-light h4,
-body.theme-light h5,
-body.theme-light h6,
-body.theme-light p,
-body.theme-light span,
-body.theme-light button,
-body.theme-light a {
-  text-shadow: none !important;
-}
-
-/* Direct class for dark photo cards & banners */
-body.theme-light .dark-overlay-card,
-body.theme-light .dark-overlay-card h1,
-body.theme-light .dark-overlay-card h2,
-body.theme-light .dark-overlay-card h3,
-body.theme-light .dark-overlay-card h4,
-body.theme-light .dark-overlay-card .text-white,
-body.theme-light [data-dark-card],
-body.theme-light [data-dark-card] h1,
-body.theme-light [data-dark-card] h2,
-body.theme-light [data-dark-card] h3,
-body.theme-light [data-dark-card] h4,
-body.theme-light [data-dark-card] .text-white {
-  color: #ffffff !important;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7) !important;
-}
-
-body.theme-light .dark-overlay-card p,
-body.theme-light .dark-overlay-card .text-gray-200,
-body.theme-light .dark-overlay-card .text-gray-300,
-body.theme-light .dark-overlay-card .text-gray-400,
-body.theme-light [data-dark-card] p,
-body.theme-light [data-dark-card] .text-gray-200,
-body.theme-light [data-dark-card] .text-gray-300,
-body.theme-light [data-dark-card] .text-gray-400 {
-  color: #e2e8f0 !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6) !important;
-}
-
-body.theme-light .dark-overlay-card .text-\[\#dfb776\],
-body.theme-light [data-dark-card] .text-\[\#dfb776\] {
-  color: #dfb776 !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6) !important;
-}
-
-/* Semi-transparent dark badges on photo cards stay dark with white text */
-body.theme-light .dark-overlay-card .bg-black\/60,
-body.theme-light .dark-overlay-card .bg-black\/70,
-body.theme-light .dark-overlay-card .bg-black\/80,
-body.theme-light [data-dark-card] .bg-black\/60,
-body.theme-light [data-dark-card] .bg-black\/70,
-body.theme-light [data-dark-card] .bg-black\/80 {
-  background-color: rgba(0, 0, 0, 0.75) !important;
-  color: #ffffff !important;
-}
-body.theme-light .dark-overlay-card .bg-black\/60 *,
-body.theme-light .dark-overlay-card .bg-black\/70 *,
-body.theme-light .dark-overlay-card .bg-black\/80 *,
-body.theme-light [data-dark-card] .bg-black\/60 *,
-body.theme-light [data-dark-card] .bg-black\/70 *,
-body.theme-light [data-dark-card] .bg-black\/80 * {
-  color: inherit;
-}
-body.theme-light .dark-overlay-card .bg-black\/60 .text-\[\#dfb776\],
-body.theme-light .dark-overlay-card .bg-black\/70 .text-\[\#dfb776\],
-body.theme-light .dark-overlay-card .bg-black\/80 .text-\[\#dfb776\],
-body.theme-light [data-dark-card] .bg-black\/60 .text-\[\#dfb776\],
-body.theme-light [data-dark-card] .bg-black\/70 .text-\[\#dfb776\],
-body.theme-light [data-dark-card] .bg-black\/80 .text-\[\#dfb776\] {
-  color: #dfb776 !important;
-}
-
-/* Solid dark/colored buttons in light mode stay white text */
-body.theme-light button.bg-black,
-body.theme-light a.bg-black {
-  color: #ffffff !important;
-}
-body.theme-light button.bg-black *,
-body.theme-light a.bg-black * {
-  color: #ffffff !important;
-}
-
-/* Solid charcoal surfaces (#1a1918 and its hover state) keep white text in light mode */
-body.theme-light .bg-\[\#1a1918\].text-white,
-body.theme-light .bg-\[\#2b2723\].text-white,
-body.theme-light .bg-\[\#1a1918\] .text-white,
-body.theme-light .bg-\[\#2b2723\] .text-white {
-  color: #ffffff !important;
-}
-
-/* Direct Concierge channels inside white card */
-body.theme-light #contact-section .bg-black\/40 {
-  background-color: #f8fafc !important;
-  border-color: rgba(0, 0, 0, 0.08) !important;
-}
-
-/* Outer modal backdrops remain dark translucent overlay */
-body.theme-light .fixed.inset-0.bg-black\/85,
-body.theme-light .fixed.inset-0.bg-black\/90,
-body.theme-light .fixed.inset-0.bg-black\/95,
-body.theme-light .fixed.inset-0.bg-black\/80,
-body.theme-light .fixed.inset-0.bg-black\/75 {
-  background-color: rgba(0, 0, 0, 0.75) !important;
-}
-
-/* Table styling for Admin Leads Page in light mode */
-body.theme-light table {
-  color: #121418 !important;
-}
-
-body.theme-light th {
-  background-color: #f8f9fb !important;
-  color: #4a5568 !important;
-  border-color: rgba(0, 0, 0, 0.1) !important;
-}
-
-body.theme-light tr {
-  border-color: rgba(0, 0, 0, 0.08) !important;
-}
-
-body.theme-light tr:hover {
-  background-color: #f1f5f9 !important;
-}
-
-/* Badge status colors in Light Mode */
-body.theme-light .text-amber-300,
-body.theme-light .text-amber-400 {
-  color: #b45309 !important;
-}
-body.theme-light .text-blue-300,
-body.theme-light .text-blue-400 {
-  color: #1d4ed8 !important;
-}
-body.theme-light .text-\[\#0ea5e9\] {
-  color: #0284c7 !important;
-}
-/* Mobile Full-Height Overlay Rules */
+/* Mobile Drawer Height */
 .mobile-menu-overlay {
-  height: 100vh !important;
-  height: 100dvh !important;
-}
-body.theme-light .mobile-menu-overlay {
-  background-color: #ffffff !important;
-  color: #121418 !important;
-}
-body:not(.theme-light) .mobile-menu-overlay {
-  background-color: #0b0c0e !important;
-  color: #ffffff !important;
-}
-body.theme-light .text-emerald-300,
-body.theme-light .text-emerald-400 {
-  color: #047857 !important;
-}
-body.theme-light .text-emerald-500 {
-  color: #059669 !important;
+  height: 100vh;
+  height: 100dvh;
 }
 
-
-
-
+/* Respect Reduced Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

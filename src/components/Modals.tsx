@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { GalleryItem, ProjectItem, BlogPost } from '../types';
 import { saveLead } from '../utils/leadsStorage';
+import { archInteriorLiving } from '../data/mockData';
 
 /* =========================================================================
    1. VIP SITE VISIT & CONSULTATION MODAL
@@ -284,8 +285,8 @@ export const VirtualTourModal: React.FC<VirtualTourModalProps> = ({ isOpen, onCl
     salon: {
       name: 'Furnished Living Salon',
       level: 'Ground Level Residence',
-      imageUrl: '/images/mysa3d/BAX09923.jpg',
-      specs: 'Solid Teak Furnishings • Built-in Media Wall • Sheer Linen Drapes & Recessed Lighting'
+      imageUrl: archInteriorLiving,
+      specs: 'Travertine Stone Floors · Burmese Teak Joinery · Coastal Daylight'
     },
     terrace: {
       name: 'Scandinavian Butterfly Gable',
@@ -330,7 +331,6 @@ export const VirtualTourModal: React.FC<VirtualTourModalProps> = ({ isOpen, onCl
         {/* Top Header Controls */}
         <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#eae4db] bg-[#f4f0eb] z-20">
           <div className="flex items-center gap-3">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#c59b67] animate-pulse" />
             <div>
               <h3 className="text-[#1a1918] font-serif-luxury text-base sm:text-xl font-normal leading-snug">
                 {viewMode === 'video'
@@ -382,7 +382,9 @@ export const VirtualTourModal: React.FC<VirtualTourModalProps> = ({ isOpen, onCl
               </button>
             )}
             <button
+              type="button"
               onClick={onClose}
+              aria-label="Close virtual tour"
               className="p-2 rounded-sm border border-[#d8cebe] hover:border-[#1a1918] text-[#1a1918] transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
@@ -471,8 +473,10 @@ export const GalleryLightbox: React.FC<GalleryLightboxProps> = ({ item, onClose 
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in">
       <div className="relative w-full max-w-4xl bg-white rounded-[24px] overflow-hidden border border-[#eae4db] shadow-2xl">
         <button
+          type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 z-30 p-2 rounded-sm bg-white/90 backdrop-blur-md border border-[#d8cebe] hover:border-[#1a1918] text-[#1a1918] transition-colors cursor-pointer shadow-sm"
+          aria-label="Close gallery lightbox"
+          className="absolute top-4 right-4 z-30 p-2.5 rounded-sm bg-white/95 backdrop-blur-md border border-[#d8cebe] hover:border-[#1a1918] text-[#1a1918] transition-colors cursor-pointer shadow-sm"
         >
           <X className="w-4 h-4" />
         </button>
@@ -481,11 +485,11 @@ export const GalleryLightbox: React.FC<GalleryLightboxProps> = ({ item, onClose 
           <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
         </div>
 
-        <div className="p-6 sm:p-8 bg-[#faf8f5] border-t border-[#eae4db] text-left">
-          <span className="px-3 py-1 rounded-full text-[10px] font-mono tracking-widest uppercase bg-[#c59b67]/15 text-[#c59b67] font-semibold border border-[#c59b67]/30">
-            {item.category}
+        <div className="p-6 sm:p-8 bg-[#faf7f2] border-t border-[#e5ddd0] text-left">
+          <span className="text-[10px] font-mono tracking-[0.22em] uppercase text-[#9a6f36] font-semibold">
+            {item.categoryLabel || item.category}
           </span>
-          <h3 className="font-serif-luxury text-2xl sm:text-3xl font-normal mt-2.5 mb-1.5 text-[#1a1918]">
+          <h3 className="font-serif-luxury text-2xl sm:text-3xl font-normal mt-1.5 mb-2 text-[#161513]">
             {item.title}
           </h3>
           <p className="text-[#68625d] text-xs sm:text-sm max-w-xl mb-3 font-light leading-relaxed">
@@ -523,21 +527,20 @@ export const ArticleReaderModal: React.FC<ArticleReaderModalProps> = ({ post, on
           <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
           <button
+            type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-sm bg-white/80 backdrop-blur-md border border-white/40 hover:border-[#1a1918] text-[#1a1918] transition-colors cursor-pointer shadow-sm"
+            aria-label="Close article reader"
+            className="absolute top-4 right-4 p-2.5 rounded-sm bg-white/90 backdrop-blur-md border border-white/40 hover:border-[#1a1918] text-[#1a1918] transition-colors cursor-pointer shadow-sm"
           >
             <X className="w-4 h-4" />
           </button>
           <div className="absolute bottom-6 left-6 right-6 text-white text-left">
-            <span className="px-3 py-1 rounded-sm text-[10px] font-mono tracking-widest uppercase bg-white/95 backdrop-blur-md text-[#1a1918] font-semibold border border-white/20">
-              {post.tag}
+            <span className="text-[10px] font-mono tracking-[0.22em] uppercase text-[#dfc08f] font-semibold block">
+              {post.tag} · {post.date} · {post.readTime}
             </span>
-            <h3 className="font-serif-luxury text-xl sm:text-2xl font-normal mt-2 text-white drop-shadow">
+            <h3 className="font-serif-luxury text-xl sm:text-2xl font-normal mt-1.5 text-white drop-shadow">
               {post.title}
             </h3>
-            <div className="text-xs text-[#c59b67] font-mono mt-1 drop-shadow">
-              {post.date} • {post.readTime}
-            </div>
           </div>
         </div>
 

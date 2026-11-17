@@ -98,11 +98,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({ presetInterest }) => {
       <section className="relative w-full mb-10 px-6 sm:px-10 lg:px-12">
         <div className="max-w-[1380px] mx-auto bg-[#fbf9f6] rounded-[32px] p-8 sm:p-14 lg:p-16 border border-[#eae4db] grid grid-cols-1 lg:grid-cols-12 gap-10 items-center shadow-sm">
           <div className="lg:col-span-7 space-y-6 text-left">
-            <div className="inline-flex items-center gap-2.5">
-              <span className="w-2 h-2 rounded-full bg-[#c59b67]" />
-              <span className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] text-[#8c827a] font-medium">
-                PRIVATE INQUIRIES, VISITS & ADVISORY
-              </span>
+            <div className="text-[11px] font-mono uppercase tracking-[0.26em] text-[#9a6f36] font-medium">
+              Private Inquiries, Visits &amp; Advisory
             </div>
             <h1 className="font-serif-luxury text-4xl sm:text-6xl lg:text-7xl font-normal tracking-tight text-[#1a1918] leading-[1.08]">
               Contact <span className="italic font-serif-luxury text-[#c59b67]">Unifra.</span>
@@ -122,14 +119,14 @@ export const ContactPage: React.FC<ContactPageProps> = ({ presetInterest }) => {
           <div className="lg:col-span-5">
             <div className="relative rounded-t-[140px] rounded-b-[24px] overflow-hidden border border-[#eae4db] shadow-md h-[340px] sm:h-[400px]">
               <img
-                src="/images/mysa3d/BAX00768.jpg"
-                alt="MYSA Lotus Gate Entrance & Portico"
+                src="/images/mysa3d/mysa-day.jpg"
+                alt="MYSA Luxe Villas Arrival Elevation"
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute bottom-4 left-6 right-6 p-3.5 bg-white/90 backdrop-blur-md rounded-lg border border-white/40 text-center">
-                <span className="text-[10px] font-mono tracking-widest text-[#1a1918] uppercase block font-medium">
-                  LOTUS GATE & ARRIVAL BOULEVARD • ECR
+              <div className="absolute bottom-4 left-6 right-6 p-3.5 bg-[#faf7f2]/95 backdrop-blur-md rounded-sm border border-[#e5ddd0] text-center">
+                <span className="text-[10px] font-mono tracking-[0.2em] text-[#161513] uppercase block font-medium">
+                  MYSA Experience Pavilion · ECR
                 </span>
               </div>
             </div>

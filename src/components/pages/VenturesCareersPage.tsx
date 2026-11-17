@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Briefcase, Handshake, ArrowRight, MapPin, Clock } from 'lucide-react';
+import { oceanfrontVillaTwilight } from '../../data/mockData';
 
 interface VenturesCareersPageProps {
   type: 'ventures' | 'careers';
@@ -86,9 +87,8 @@ export const VenturesCareersPage: React.FC<VenturesCareersPageProps> = ({ type, 
             {/* Split hero */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center mb-14 sm:mb-16">
               <div className="lg:col-span-6 space-y-6">
-                <div className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] text-[#c59b67] flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-[#c59b67] rounded-full" />
-                  <span>PARTNERSHIPS & ACQUISITION</span>
+                <div className="text-[11px] font-mono uppercase tracking-[0.26em] text-[#9a6f36]">
+                  Partnerships &amp; Acquisition
                 </div>
                 <h1 className="font-serif-luxury text-4xl sm:text-6xl font-normal text-[#1a1918] tracking-tight leading-[1.05]">
                   Partner With Us on{' '}
@@ -109,7 +109,7 @@ export const VenturesCareersPage: React.FC<VenturesCareersPageProps> = ({ type, 
               <div className="lg:col-span-6">
                 <div className="relative max-w-[520px] mx-auto h-[420px] sm:h-[520px] rounded-t-[260px] rounded-b-[24px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.10)] border border-[#eae4db] bg-[#eae5dc]">
                   <img
-                    src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=80"
+                    src={oceanfrontVillaTwilight}
                     alt="Unifra coastal residence"
                     className="w-full h-full object-cover"
                     loading="lazy"
@@ -145,9 +145,8 @@ export const VenturesCareersPage: React.FC<VenturesCareersPageProps> = ({ type, 
           <div className="animate-in fade-in duration-300">
             {/* Careers hero */}
             <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
-              <div className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] text-[#c59b67] mb-4 flex items-center justify-center gap-2">
-                <span className="w-1.5 h-1.5 bg-[#c59b67] rounded-full" />
-                <span>OPPORTUNITIES</span>
+              <div className="text-[11px] font-mono uppercase tracking-[0.26em] text-[#9a6f36] mb-4">
+                Opportunities
               </div>
               <h1 className="font-serif-luxury text-4xl sm:text-6xl font-normal text-[#1a1918] tracking-tight mb-5 leading-[1.05]">
                 Build the Future of{' '}

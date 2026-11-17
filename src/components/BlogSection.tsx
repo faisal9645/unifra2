@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUpRight, Calendar, Clock } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { BLOG_POSTS } from '../data/mockData';
 import { BlogPost } from '../types';
 
@@ -9,75 +9,60 @@ interface BlogSectionProps {
 
 export const BlogSection: React.FC<BlogSectionProps> = ({ onReadArticle }) => {
   return (
-    <section id="blog" className="py-10 sm:py-14 bg-[#faf8f5] text-[#1a1918] border-t border-[#eae4db]">
+    <section id="blog" className="py-12 sm:py-16 bg-[#faf7f2] text-[#161513]">
       <div className="w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-12">
-        {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
-          <div className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] text-[#c59b67] mb-3 flex items-center justify-center gap-2">
-            <span className="w-1.5 h-1.5 bg-[#c59b67] rounded-full" />
-            <span>EDITORIAL JOURNAL</span>
-          </div>
-
-          <h2 className="font-serif-luxury text-3xl sm:text-5xl font-normal text-[#1a1918] tracking-tight mb-4">
-            From Our <span className="italic font-serif-luxury text-[#c59b67]">Journal</span>
-          </h2>
-          <p className="text-[#68625d] text-xs sm:text-sm leading-relaxed max-w-xl mx-auto font-light">
-            Architectural perspectives, Scandinavian craftsmanship, and the evolution of coastal luxury in Chennai.
+        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+          <span className="text-[11px] font-mono uppercase tracking-[0.26em] text-[#9a6f36] mb-3 block">
+            Editorial Journal
+          </span>
+          <h1 className="font-serif-luxury text-4xl sm:text-5xl lg:text-6xl font-normal text-[#161513] tracking-tight mb-4">
+            From Our <span className="italic text-[#b88c52]">Journal</span>
+          </h1>
+          <p className="text-[#5a544e] text-sm leading-relaxed max-w-xl mx-auto font-light">
+            Architectural perspectives, Scandinavian craftsmanship, and the evolution of coastal living in Chennai.
           </p>
         </div>
 
-        {/* Blog Post Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-7">
           {BLOG_POSTS.map((post) => (
             <article
               key={post.id}
               onClick={() => onReadArticle(post)}
-              className="group bg-white rounded-[20px] overflow-hidden border border-[#eae4db] hover:border-[#c59b67] transition-all duration-300 transform hover:-translate-y-1.5 flex flex-col cursor-pointer shadow-sm hover:shadow-xl"
+              className="group bg-white rounded-[16px] overflow-hidden border border-[#e5ddd0] hover:border-[#b88c52] transition-all duration-300 flex flex-col cursor-pointer shadow-sm hover:shadow-[0_20px_44px_rgba(22,21,19,0.08)]"
             >
-              {/* Thumbnail with Tag Pill */}
-              <div className="relative h-52 overflow-hidden bg-[#eae5dc]">
+              <div className="relative h-56 overflow-hidden bg-[#e6dfd3]">
                 <img
                   src={post.imageUrl}
                   alt={post.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60" />
-
-                <div className="absolute top-3 right-3">
-                  <span className="px-3 py-1 rounded-full text-[9px] font-mono tracking-wider uppercase font-semibold bg-white/95 backdrop-blur-md text-[#1a1918] border border-[#e5ded4]">
-                    {post.tag}
-                  </span>
-                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
               </div>
 
-              {/* Content */}
               <div className="p-6 flex-1 flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center gap-3 text-[10px] font-mono text-[#8c827a] mb-2.5 uppercase tracking-wider">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3 text-[#c59b67]" />
-                      {post.date}
-                    </span>
-                    <span>•</span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-[#c59b67]" />
-                      {post.readTime}
-                    </span>
+                  {/* Zero-pill unboxed metadata with typographic separators */}
+                  <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-mono text-[#7c746b] mb-3 uppercase tracking-[0.14em]">
+                    <span className="text-[#9a6f36] font-semibold">{post.tag}</span>
+                    <span aria-hidden="true">·</span>
+                    <span>{post.date}</span>
+                    <span aria-hidden="true">·</span>
+                    <span>{post.readTime}</span>
                   </div>
 
-                  <h3 className="font-serif-luxury text-base sm:text-lg font-bold text-[#1a1918] leading-snug group-hover:text-[#c59b67] transition-colors mb-2">
+                  <h2 className="font-serif-luxury text-xl font-normal text-[#161513] leading-snug group-hover:text-[#9a6f36] transition-colors mb-2.5">
                     {post.title}
-                  </h3>
+                  </h2>
 
-                  <p className="text-[#68625d] text-xs line-clamp-3 leading-relaxed font-light">
+                  <p className="text-[#5a544e] text-xs line-clamp-3 leading-relaxed font-light">
                     {post.summary}
                   </p>
                 </div>
 
-                <div className="pt-4 mt-4 border-t border-[#f0ece4] flex items-center justify-between text-xs font-mono uppercase tracking-wider text-[#1a1918] group-hover:text-[#c59b67] transition-colors">
-                  <span>Read Article</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform text-[#c59b67]" />
+                <div className="pt-4 mt-5 border-t border-[#efe8dc] flex items-center justify-between text-[11px] font-mono uppercase tracking-[0.18em] text-[#161513] group-hover:text-[#9a6f36] transition-colors">
+                  <span>Read Essay</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 text-[#b88c52] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 </div>
               </div>
             </article>
